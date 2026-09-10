@@ -1,0 +1,8 @@
+/* The artifact viewer injects these; served as a plain page we bring our own.
+   [hidden] matters most — several controls are toggled with the attribute and
+   .btn would otherwise override it. */
+:root{color-scheme:light dark}
+[hidden]{display:none !important}
+img{max-width:100%}
+
+*{box-sizing:border-box}

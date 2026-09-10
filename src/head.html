@@ -81,6 +81,13 @@
   --sk-1:#1E2330; --sk-2:#262C3B;
 }
 
+/* The artifact viewer injects these; served as a plain page we bring our own.
+   [hidden] matters most - several controls are toggled with the attribute and
+   .btn would otherwise override it. */
+:root{color-scheme:light dark}
+[hidden]{display:none !important}
+img{max-width:100%}
+
 *{box-sizing:border-box}
 body{
   margin:0; background:var(--bg); color:var(--text);
@@ -147,6 +154,7 @@ button{font:inherit; color:inherit}
 /* ---------- controls ---------- */
 .btn{
   display:inline-flex; align-items:center; justify-content:center; gap:7px;
+  color:var(--text);
   padding:8px 14px; border-radius:8px; border:1px solid var(--line);
   background:var(--surface); cursor:pointer; font-weight:600; font-size:14px;
   transition:background .12s, border-color .12s, transform .06s;

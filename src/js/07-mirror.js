@@ -42,7 +42,8 @@ const RULER_ANCHORS = { 0:"FRONT", 90:"RIGHT", 180:"BACK", 270:"LEFT" };
     h += `<i class="rtick${maj ? " maj" : ""}" style="left:${d/360*100}%;height:${maj ? 15 : 7}px"></i>`;
     if(d % 45 === 0){
       const lab = RULER_ANCHORS[d] || (d + "°");
-      h += `<span class="rlab" style="left:${d/360*100}%">${lab}</span>`;
+      const pos = d === 0 ? "left:3px;transform:none" : `left:${d/360*100}%`;
+      h += `<span class="rlab" style="${pos}">${lab}</span>`;
     }
   }
   t.innerHTML = h;
@@ -51,7 +52,7 @@ function paintRuler(d){
   const pct = d/360*100;
   $("#rhead").style.left = pct + "%";
   const read = $("#rread");
-  read.style.left = clamp(pct, 6, 94) + "%";
+  read.style.left = clamp(pct, 12, 88) + "%";
   const near = Object.keys(RULER_ANCHORS).find(k => Math.abs(((d - +k + 540) % 360) - 180) < 8);
   read.textContent = Math.round(d) + "°" + (near !== undefined ? " " + RULER_ANCHORS[near] : "");
   const r = $("#ruler");

@@ -87,6 +87,11 @@ It concatenates `src/head.html`, `src/body.html`, a pinned three.js tag, and
 each file in `src/js/` wrapped in its own `<script>` block. That is the entire
 build.
 
+It writes two files. `index.html` is a complete HTML document and is the app.
+`dist/artifact.html` is the same page as a fragment, for publishing to the
+Claude artifact viewer, which supplies its own document skeleton and rejects a
+page that brings one. `dist/` is not tracked.
+
 | File | What is in it |
 | --- | --- |
 | `src/head.html` | `<title>`, fonts, the whole stylesheet |
