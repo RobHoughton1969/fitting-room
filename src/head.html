@@ -1,0 +1,421 @@
+<title>Fitting Room</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,500;0,6..96,600;1,6..96,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* ============================================================
+   Fitting Room — tokens
+   Light palette is complete on bare :root; dark redefines only
+   tokens, guarded so an explicit choice always wins.
+   ============================================================ */
+:root{
+  --bg:#ECEDF1;
+  --on-accent:#FFF8EE;
+  --bg-deep:#DFE1E8;
+  --surface:#FFFFFF;
+  --surface-2:#E6E8EE;
+  --surface-3:#DADDE5;
+  --line:#C9CDD8;
+  --line-soft:#DDE0E8;
+  --text:#191C24;
+  --text-2:#454B5A;
+  --muted:#666D7E;
+  --accent:#A96A16;
+  --accent-bright:#C9821F;
+  --accent-soft:#F4E6D0;
+  --accent-line:#E2C79B;
+  --good:#1F7A57;
+  --good-soft:#DCEFE6;
+  --bad:#A8323D;
+  --bad-soft:#F6DFE1;
+  --stage-1:#F6F5F3;
+  --stage-2:#DDDCE2;
+  --stage-glow:rgba(201,130,31,.28);
+  --shadow-s:0 1px 2px rgba(20,24,34,.07),0 2px 6px rgba(20,24,34,.05);
+  --shadow-m:0 2px 4px rgba(20,24,34,.06),0 10px 28px rgba(20,24,34,.10);
+  --tag-notch:#ECEDF1;
+  --scrim:rgba(16,19,25,.45);
+  --sk-1:#E1E4EB; --sk-2:#EDEFF3;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0E1117;
+    --on-accent:#15100A;
+    --bg-deep:#090B10;
+    --surface:#171B24;
+    --surface-2:#1E2330;
+    --surface-3:#262C3B;
+    --line:#2E3546;
+    --line-soft:#242A38;
+    --text:#E6E8EF;
+    --text-2:#B9BFCE;
+    --muted:#8B93A6;
+    --accent:#E0A458;
+    --accent-bright:#F0B96E;
+    --accent-soft:#37291A;
+    --accent-line:#5A452A;
+    --good:#5FBF95;
+    --good-soft:#16302A;
+    --bad:#E0707C;
+    --bad-soft:#361D22;
+    --stage-1:#1C2130;
+    --stage-2:#0C0E14;
+    --stage-glow:rgba(224,164,88,.20);
+    --shadow-s:0 1px 2px rgba(0,0,0,.4);
+    --shadow-m:0 2px 4px rgba(0,0,0,.35),0 14px 34px rgba(0,0,0,.45);
+    --tag-notch:#0E1117;
+    --scrim:rgba(4,6,10,.66);
+    --sk-1:#1E2330; --sk-2:#262C3B;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0E1117; --on-accent:#15100A; --bg-deep:#090B10; --surface:#171B24; --surface-2:#1E2330;
+  --surface-3:#262C3B; --line:#2E3546; --line-soft:#242A38; --text:#E6E8EF;
+  --text-2:#B9BFCE; --muted:#8B93A6; --accent:#E0A458; --accent-bright:#F0B96E;
+  --accent-soft:#37291A; --accent-line:#5A452A; --good:#5FBF95; --good-soft:#16302A;
+  --bad:#E0707C; --bad-soft:#361D22; --stage-1:#1C2130; --stage-2:#0C0E14;
+  --stage-glow:rgba(224,164,88,.20);
+  --shadow-s:0 1px 2px rgba(0,0,0,.4);
+  --shadow-m:0 2px 4px rgba(0,0,0,.35),0 14px 34px rgba(0,0,0,.45);
+  --tag-notch:#0E1117; --scrim:rgba(4,6,10,.66);
+  --sk-1:#1E2330; --sk-2:#262C3B;
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--bg); color:var(--text);
+  font-family:"Archivo","Helvetica Neue",Helvetica,Arial,sans-serif;
+  font-size:15px; line-height:1.5; -webkit-font-smoothing:antialiased;
+  overscroll-behavior-y:none;
+}
+h1,h2,h3{margin:0; text-wrap:balance}
+button{font:inherit; color:inherit}
+:focus-visible{outline:2px solid var(--accent); outline-offset:2px; border-radius:4px}
+.mono{font-family:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace; font-variant-numeric:tabular-nums}
+.serif{font-family:"Bodoni Moda","Didot","Times New Roman",serif}
+.vh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* ---------- shell ---------- */
+.shell{display:flex; min-height:100dvh; flex-direction:column}
+.rail{
+  display:none; flex-direction:column; gap:4px; width:238px; flex:0 0 238px;
+  padding:22px 16px 16px; border-right:1px solid var(--line-soft);
+  background:var(--surface); position:sticky; top:0; height:100dvh;
+}
+.mark{display:flex; flex-direction:column; gap:2px; padding:0 8px 20px}
+.mark .wm{font-family:"Bodoni Moda",serif; font-size:27px; line-height:1; letter-spacing:.005em}
+.mark .wm em{font-style:italic}
+.mark .sub{font-family:"IBM Plex Mono",monospace; font-size:10px; letter-spacing:.16em;
+  text-transform:uppercase; color:var(--muted)}
+.navbtn{
+  display:flex; align-items:center; gap:11px; padding:9px 10px; border-radius:8px;
+  border:1px solid transparent; background:none; cursor:pointer; text-align:left; width:100%;
+  color:var(--text-2); font-weight:500;
+}
+.navbtn:hover{background:var(--surface-2); color:var(--text)}
+.navbtn[aria-current="true"]{background:var(--accent-soft); border-color:var(--accent-line); color:var(--text)}
+.navbtn .ico{width:20px; height:20px; flex:0 0 20px; color:var(--accent)}
+.navbtn .n{font-family:"IBM Plex Mono",monospace; font-size:10px; color:var(--muted); margin-left:auto}
+.railfoot{margin-top:auto; padding:12px 8px 0; border-top:1px solid var(--line-soft); display:flex; flex-direction:column; gap:8px}
+
+.topbar{
+  display:flex; align-items:center; gap:12px; padding:12px 16px;
+  border-bottom:1px solid var(--line-soft); background:var(--surface); position:sticky; top:0; z-index:20;
+}
+.topbar .wm{font-family:"Bodoni Moda",serif; font-size:21px; line-height:1}
+.tabbar{
+  position:sticky; bottom:0; z-index:20; display:grid; grid-template-columns:repeat(4,1fr);
+  gap:2px; padding:6px 6px calc(6px + env(safe-area-inset-bottom)); background:var(--surface);
+  border-top:1px solid var(--line-soft);
+}
+.tabbtn{display:flex; flex-direction:column; align-items:center; gap:3px; padding:7px 2px;
+  border:0; background:none; border-radius:8px; cursor:pointer; color:var(--muted); font-size:11px; font-weight:600}
+.tabbtn .ico{width:21px;height:21px}
+.tabbtn[aria-current="true"]{color:var(--accent); background:var(--accent-soft)}
+.main{flex:1; min-width:0; display:flex; flex-direction:column}
+.view{display:none; flex:1; min-height:0}
+.view.on{display:block}
+.view.on.flexcol{display:flex; flex-direction:column}
+.wrap{max-width:1120px; margin:0 auto; padding:22px 16px 40px; width:100%}
+
+.vhead{display:flex; align-items:flex-end; justify-content:space-between; gap:16px; flex-wrap:wrap; margin-bottom:18px}
+.vhead h2{font-family:"Bodoni Moda",serif; font-size:30px; font-weight:500; line-height:1.05}
+.vhead p{margin:5px 0 0; color:var(--muted); max-width:62ch; font-size:14px}
+.eyebrow{font-family:"IBM Plex Mono",monospace; font-size:10px; letter-spacing:.18em;
+  text-transform:uppercase; color:var(--accent); margin-bottom:6px}
+
+/* ---------- controls ---------- */
+.btn{
+  display:inline-flex; align-items:center; justify-content:center; gap:7px;
+  padding:8px 14px; border-radius:8px; border:1px solid var(--line);
+  background:var(--surface); cursor:pointer; font-weight:600; font-size:14px;
+  transition:background .12s, border-color .12s, transform .06s;
+}
+.btn:hover{background:var(--surface-2)}
+.btn:active{transform:translateY(1px)}
+.btn.pri{background:var(--accent); border-color:var(--accent); color:var(--on-accent)}
+.btn.pri:hover{background:var(--accent-bright); border-color:var(--accent-bright)}
+.btn.ghost{background:none; border-color:transparent; color:var(--muted); font-weight:500}
+.btn.ghost:hover{background:var(--surface-2); color:var(--text)}
+.btn.danger{color:var(--bad); border-color:var(--line)}
+.btn.danger:hover{background:var(--bad-soft)}
+.btn.sm{padding:5px 10px; font-size:13px; border-radius:7px}
+.btn[disabled]{opacity:.45; cursor:not-allowed}
+.btn .ico{width:16px;height:16px}
+
+.chips{display:flex; flex-wrap:wrap; gap:6px}
+.chip{
+  padding:5px 11px; border-radius:999px; border:1px solid var(--line);
+  background:var(--surface); cursor:pointer; font-size:13px; font-weight:500; color:var(--text-2);
+}
+.chip:hover{border-color:var(--accent-line)}
+.chip[aria-pressed="true"]{background:var(--accent-soft); border-color:var(--accent); color:var(--text)}
+.field{display:flex; flex-direction:column; gap:5px}
+.field > label, .flabel{font-family:"IBM Plex Mono",monospace; font-size:10px; letter-spacing:.14em;
+  text-transform:uppercase; color:var(--muted)}
+input[type=text], input[type=number], select, textarea{
+  width:100%; padding:8px 10px; border-radius:7px; border:1px solid var(--line);
+  background:var(--bg); color:var(--text); font:inherit; font-size:14px;
+}
+textarea{resize:vertical; min-height:56px}
+input[type=range]{width:100%; accent-color:var(--accent); background:transparent}
+.row{display:flex; gap:10px; align-items:center}
+.grow{flex:1; min-width:0}
+
+.statuschip{
+  display:inline-flex; align-items:center; gap:7px; padding:5px 9px; border-radius:7px;
+  background:var(--surface-2); border:1px solid var(--line-soft);
+  font-family:"IBM Plex Mono",monospace; font-size:10.5px; color:var(--muted); letter-spacing:.04em;
+}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--muted); flex:0 0 6px}
+.dot.on{background:var(--good)}
+.dot.local{background:var(--accent)}
+
+.notice{
+  display:flex; gap:11px; align-items:flex-start; padding:11px 13px; border-radius:9px;
+  background:var(--accent-soft); border:1px solid var(--accent-line); font-size:13.5px; color:var(--text-2);
+  margin-bottom:18px;
+}
+.notice .ico{width:17px;height:17px;flex:0 0 17px;color:var(--accent);margin-top:1px}
+.notice b{color:var(--text)}
+
+/* ---------- selfie ---------- */
+.angles{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:14px}
+.angle{
+  border:1px solid var(--line); border-radius:12px; background:var(--surface);
+  overflow:hidden; display:flex; flex-direction:column;
+}
+.angle .ph{
+  aspect-ratio:3/4; background:
+    repeating-linear-gradient(45deg,var(--surface-2) 0 8px,var(--surface) 8px 16px);
+  position:relative; display:grid; place-items:center;
+}
+.angle .ph img{width:100%;height:100%;object-fit:cover;display:block}
+.angle .ph .glyph{width:52px;height:52px;color:var(--line); opacity:.9}
+.angle .cap{display:flex; align-items:center; justify-content:space-between; gap:8px; padding:9px 11px;
+  border-top:1px solid var(--line-soft)}
+.angle .cap .nm{font-weight:600; font-size:13.5px}
+.angle .cap .deg{font-family:"IBM Plex Mono",monospace; font-size:10.5px; color:var(--muted)}
+.angle .acts{display:flex; gap:6px; padding:0 11px 11px}
+.angle.has .ph{background:var(--surface-2)}
+
+.camwrap{position:relative; border-radius:12px; overflow:hidden; background:#000; aspect-ratio:3/4; max-height:62vh; margin:0 auto}
+.camwrap video{width:100%;height:100%;object-fit:cover;display:block}
+.camguide{position:absolute; inset:0; pointer-events:none}
+.camhint{position:absolute; left:0; right:0; bottom:0; padding:12px 14px;
+  background:linear-gradient(transparent,rgba(0,0,0,.72)); color:#fff; font-size:13.5px}
+
+/* ---------- wardrobe ---------- */
+.wbar{display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-bottom:16px}
+.grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(158px,1fr)); gap:14px}
+.tag{
+  position:relative; border:1px solid var(--line); border-radius:10px; background:var(--surface);
+  overflow:hidden; text-align:left; cursor:pointer; padding:0; display:flex; flex-direction:column;
+  transition:border-color .12s, box-shadow .12s, transform .08s;
+}
+.tag:hover{border-color:var(--accent-line); box-shadow:var(--shadow-m); transform:translateY(-1px)}
+.tag[aria-pressed="true"]{border-color:var(--accent); box-shadow:0 0 0 1px var(--accent)}
+.tag .sw{aspect-ratio:1/1; background:var(--surface-2); position:relative; overflow:hidden}
+.tag .sw img{width:100%;height:100%;object-fit:cover;display:block}
+.tag .hole{
+  position:absolute; top:9px; left:9px; width:11px; height:11px; border-radius:50%;
+  background:var(--tag-notch); box-shadow:inset 0 0 0 1px rgba(0,0,0,.18); z-index:2;
+}
+.tag .worn{
+  position:absolute; top:7px; right:7px; z-index:2; padding:2px 6px; border-radius:5px;
+  background:var(--scrim); color:#fff; font-family:"IBM Plex Mono",monospace; font-size:9.5px;
+}
+.tag .body{padding:9px 10px 11px; display:flex; flex-direction:column; gap:3px; flex:1}
+.tag .nm{font-weight:600; font-size:13.5px; line-height:1.25; overflow-wrap:anywhere}
+.tag .spec{font-family:"IBM Plex Mono",monospace; font-size:10px; color:var(--muted);
+  letter-spacing:.03em; display:flex; align-items:center; gap:5px; margin-top:auto; padding-top:5px}
+.tag .swatchdot{width:9px;height:9px;border-radius:2px;border:1px solid rgba(128,128,128,.4); flex:0 0 9px}
+.tag .onbody{position:absolute; inset:auto 0 0 0; height:3px; background:var(--accent)}
+
+.empty{
+  border:1px dashed var(--line); border-radius:12px; padding:34px 22px; text-align:center;
+  color:var(--muted); background:var(--surface);
+}
+.empty h3{font-family:"Bodoni Moda",serif; font-size:21px; color:var(--text); margin-bottom:6px; font-weight:500}
+
+/* ---------- sheet / modal ---------- */
+.sheet{
+  position:fixed; inset:0; z-index:60; display:none; align-items:flex-end; justify-content:center;
+  background:var(--scrim); backdrop-filter:blur(2px);
+}
+.sheet.on{display:flex}
+.sheetbox{
+  background:var(--surface); width:100%; max-width:560px; max-height:92dvh; overflow:auto;
+  border-radius:16px 16px 0 0; border:1px solid var(--line); border-bottom:0;
+  padding:18px 18px calc(18px + env(safe-area-inset-bottom));
+  display:flex; flex-direction:column; gap:14px;
+}
+.sheethead{display:flex; align-items:center; justify-content:space-between; gap:12px}
+.sheethead h3{font-family:"Bodoni Moda",serif; font-size:22px; font-weight:500}
+.f2{display:grid; grid-template-columns:1fr 1fr; gap:12px}
+.scaleRow{display:flex; align-items:center; gap:10px}
+.scaleRow .val{font-family:"IBM Plex Mono",monospace; font-size:11px; color:var(--muted); min-width:88px; text-align:right}
+.previewimg{width:100%; aspect-ratio:4/3; object-fit:contain; background:var(--surface-2);
+  border-radius:9px; border:1px solid var(--line-soft)}
+
+/* ---------- mirror ---------- */
+/* display is owned by .view / .view.on.flexcol — never set it here, or the
+   mirror stays painted behind the other rooms */
+.mirror{min-height:0}
+
+/* ---------- body scan ---------- */
+.measgrid{display:grid; grid-template-columns:repeat(auto-fit,minmax(96px,1fr)); gap:1px;
+  background:var(--line-soft); border:1px solid var(--line-soft); border-radius:9px;
+  overflow:hidden; margin-top:14px}
+.meas{background:var(--surface); padding:9px 11px; display:flex; flex-direction:column; gap:1px}
+.meas .k{font-family:"IBM Plex Mono",monospace; font-size:9.5px; letter-spacing:.14em;
+  text-transform:uppercase; color:var(--muted)}
+.meas .v{font-size:21px; font-weight:600; line-height:1.15; font-variant-numeric:tabular-nums}
+.meas .v i{font-style:normal; font-size:11px; color:var(--muted); margin-left:2px; font-weight:500}
+.scanrow{margin-top:16px; grid-template-columns:repeat(auto-fit,minmax(132px,1fr))}
+.subhead{display:flex; align-items:baseline; gap:10px; margin:26px 0 12px}
+.subhead h3{font-family:"Bodoni Moda",serif; font-size:22px; font-weight:500}
+.subhead p{margin:0; color:var(--muted); font-size:13.5px}
+.mirrorgrid{display:flex; flex-direction:column; flex:1; min-height:0}
+.stage{
+  position:relative; flex:1; min-height:340px;
+  background:
+    radial-gradient(120% 82% at 50% 8%, var(--stage-glow) 0%, transparent 58%),
+    linear-gradient(178deg, var(--stage-1) 0%, var(--stage-2) 100%);
+  overflow:hidden; touch-action:none; cursor:grab;
+}
+.stage.drag{cursor:grabbing}
+.stage canvas{display:block; width:100%; height:100%}
+.stage.mirrored canvas{transform:scaleX(-1)}
+.bulbs{position:absolute; top:0; left:0; right:0; display:flex; justify-content:center; gap:26px; padding:9px 0; pointer-events:none}
+.bulb{width:7px;height:7px;border-radius:50%;background:var(--accent);
+  box-shadow:0 0 9px 3px var(--stage-glow); opacity:.85}
+.stagebadge{
+  position:absolute; top:14px; right:14px; padding:4px 9px; border-radius:6px;
+  background:var(--scrim); color:#fff; font-family:"IBM Plex Mono",monospace; font-size:10px;
+  letter-spacing:.12em; text-transform:uppercase;
+}
+.stagenote{
+  position:absolute; left:14px; top:14px; max-width:230px; padding:8px 10px; border-radius:8px;
+  background:var(--scrim); color:#fff; font-size:12px; line-height:1.4;
+}
+.stagetools{position:absolute; right:12px; bottom:12px; display:flex; flex-direction:column; gap:7px}
+.iconbtn{
+  width:38px;height:38px; display:grid; place-items:center; border-radius:9px;
+  border:1px solid var(--line); background:var(--surface); cursor:pointer; box-shadow:var(--shadow-s);
+}
+.iconbtn:hover{background:var(--surface-2)}
+.iconbtn[aria-pressed="true"]{background:var(--accent); border-color:var(--accent); color:var(--on-accent)}
+.iconbtn .ico{width:18px;height:18px}
+
+/* turntable ruler */
+.ruler{position:relative; height:46px; border-top:1px solid var(--line-soft);
+  border-bottom:1px solid var(--line-soft); background:var(--surface); user-select:none; touch-action:none; cursor:ew-resize}
+.rtrack{position:absolute; inset:0}
+.rtick{position:absolute; bottom:16px; width:1px; background:var(--line)}
+.rtick.maj{background:var(--muted)}
+.rlab{position:absolute; bottom:2px; transform:translateX(-50%);
+  font-family:"IBM Plex Mono",monospace; font-size:9px; letter-spacing:.1em; color:var(--muted); white-space:nowrap}
+.rhead{position:absolute; top:0; bottom:0; width:2px; background:var(--accent); transform:translateX(-1px)}
+.rhead::before{
+  content:""; position:absolute; top:0; left:50%; transform:translateX(-50%);
+  border-left:5px solid transparent; border-right:5px solid transparent; border-top:6px solid var(--accent);
+}
+.rread{
+  position:absolute; top:5px; transform:translateX(-50%); padding:1px 6px; border-radius:5px;
+  background:var(--accent); color:var(--on-accent); font-family:"IBM Plex Mono",monospace; font-size:10px; white-space:nowrap;
+}
+.mirrorbar{
+  display:flex; gap:8px; align-items:center; padding:10px 14px; background:var(--surface);
+  border-top:1px solid var(--line-soft); overflow-x:auto; flex-wrap:nowrap;
+}
+.wearing{display:flex; gap:7px; align-items:center; flex:1; min-width:0; overflow-x:auto; padding-bottom:2px}
+.wearing, .lookpieces, .mirrorbar{scrollbar-width:thin; scrollbar-color:var(--line) transparent}
+.wearing::-webkit-scrollbar, .lookpieces::-webkit-scrollbar, .mirrorbar::-webkit-scrollbar{height:5px}
+.wearing::-webkit-scrollbar-track, .lookpieces::-webkit-scrollbar-track, .mirrorbar::-webkit-scrollbar-track{background:transparent}
+.wearing::-webkit-scrollbar-thumb, .lookpieces::-webkit-scrollbar-thumb, .mirrorbar::-webkit-scrollbar-thumb{background:var(--line); border-radius:3px}
+.wchip{
+  display:inline-flex; align-items:center; gap:6px; padding:4px 8px 4px 4px; border-radius:999px;
+  border:1px solid var(--line); background:var(--bg); font-size:12.5px; white-space:nowrap; flex:0 0 auto;
+}
+.wchip img{width:22px;height:22px;border-radius:50%;object-fit:cover}
+.wchip .x{border:0;background:none;cursor:pointer;color:var(--muted);padding:0 2px;font-size:15px;line-height:1}
+.wchip .x:hover{color:var(--bad)}
+.panel{background:var(--surface); border-top:1px solid var(--line-soft); padding:14px; display:none}
+.panel.on{display:block}
+.panel h4{font-family:"IBM Plex Mono",monospace; font-size:10px; letter-spacing:.16em;
+  text-transform:uppercase; color:var(--muted); margin:0 0 10px; font-weight:500}
+.pgrid{display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:16px}
+
+/* ---------- occasion ---------- */
+.occgrid{display:grid; gap:20px; grid-template-columns:1fr}
+.card{background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:16px}
+.card h3{font-family:"Bodoni Moda",serif; font-size:19px; font-weight:500; margin-bottom:3px}
+.look{
+  background:var(--surface); border:1px solid var(--line); border-radius:12px; overflow:hidden;
+  display:flex; flex-direction:column;
+}
+.look + .look{margin-top:14px}
+.lookhead{display:flex; align-items:baseline; justify-content:space-between; gap:12px; padding:13px 15px 9px}
+.lookhead .rank{font-family:"IBM Plex Mono",monospace; font-size:10px; color:var(--accent); letter-spacing:.16em}
+.lookhead h3{font-family:"Bodoni Moda",serif; font-size:20px; font-weight:500; line-height:1.15}
+.lookfit{font-family:"IBM Plex Mono",monospace; font-size:11px; color:var(--muted); white-space:nowrap}
+.lookpieces{display:flex; gap:9px; padding:2px 15px 12px; overflow-x:auto}
+.piece{flex:0 0 84px; text-align:left}
+.piece .sw{width:84px;height:84px;border-radius:8px;overflow:hidden;background:var(--surface-2);border:1px solid var(--line-soft)}
+.piece .sw img{width:100%;height:100%;object-fit:cover;display:block}
+.piece .role{font-family:"IBM Plex Mono",monospace; font-size:9px; letter-spacing:.12em;
+  text-transform:uppercase; color:var(--muted); margin-top:5px}
+.piece .nm{font-size:12px; line-height:1.25; margin-top:1px}
+.why{border-top:1px solid var(--line-soft); padding:11px 15px; display:flex; flex-direction:column; gap:5px}
+.why li{font-size:13px; color:var(--text-2); display:flex; gap:8px; align-items:flex-start; list-style:none}
+.why ul{margin:0;padding:0}
+.why .mk{color:var(--accent); font-family:"IBM Plex Mono",monospace; font-size:10px; margin-top:3px}
+.why .mk.warn{color:var(--bad)}
+.lookacts{display:flex; gap:8px; padding:0 15px 14px; flex-wrap:wrap}
+.meter{height:5px; border-radius:3px; background:var(--surface-3); overflow:hidden; width:78px}
+.meter i{display:block; height:100%; background:var(--accent)}
+
+.skel{background:linear-gradient(90deg,var(--sk-1) 0%,var(--sk-2) 50%,var(--sk-1) 100%);
+  background-size:200% 100%; animation:sh 1.4s linear infinite; border-radius:8px}
+@keyframes sh{to{background-position:-200% 0}}
+.toast{
+  position:fixed; left:50%; bottom:calc(76px + env(safe-area-inset-bottom)); transform:translateX(-50%);
+  background:var(--text); color:var(--bg); padding:9px 15px; border-radius:9px; font-size:13.5px;
+  z-index:90; box-shadow:var(--shadow-m); opacity:0; pointer-events:none; transition:opacity .18s, transform .18s;
+}
+.toast.on{opacity:1; transform:translateX(-50%) translateY(-4px)}
+
+@media (min-width:900px){
+  .shell{flex-direction:row}
+  .rail{display:flex}
+  .topbar,.tabbar{display:none}
+  .toast{bottom:24px}
+  .occgrid{grid-template-columns:340px 1fr; align-items:start}
+  .wrap{padding:28px 26px 46px}
+  .vhead h2{font-size:34px}
+}
+@media (prefers-reduced-motion:reduce){
+  *{animation-duration:.001ms !important; transition-duration:.001ms !important}
+}
+</style>

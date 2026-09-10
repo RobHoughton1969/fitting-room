@@ -1,0 +1,178 @@
+
+<svg class="vh" aria-hidden="true"><defs>
+<g id="i-selfie"><circle cx="12" cy="8.5" r="4" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M4.5 20.5c1.4-3.6 4.2-5.5 7.5-5.5s6.1 1.9 7.5 5.5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></g>
+<g id="i-hanger"><path d="M12 6.2a2.1 2.1 0 1 1 2.1 2.1c0 1.3-2.1 1.3-2.1 2.6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M12 11.2 3.4 17.1c-.8.6-.4 1.9.6 1.9h16c1 0 1.4-1.3.6-1.9L12 11.2Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></g>
+<g id="i-mirror"><rect x="5.5" y="2.8" width="13" height="15.4" rx="6.5" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M9 21.2h6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M12 6.2v9.2" stroke="currentColor" stroke-width="1.3" stroke-dasharray="2 2.4"/></g>
+<g id="i-cal"><rect x="3.4" y="5" width="17.2" height="15.6" rx="2.4" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M3.4 9.6h17.2M8 3.4v3.2M16 3.4v3.2" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><circle cx="12" cy="14.6" r="1.8" fill="currentColor"/></g>
+<g id="i-cam"><path d="M3.4 8.4c0-1.1.9-2 2-2h2.3l1.2-2h6.2l1.2 2h2.3c1.1 0 2 .9 2 2v9.2c0 1.1-.9 2-2 2H5.4c-1.1 0-2-.9-2-2V8.4Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><circle cx="12" cy="13" r="3.6" fill="none" stroke="currentColor" stroke-width="1.7"/></g>
+<g id="i-plus"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></g>
+<g id="i-flip"><path d="M12 3v18" stroke="currentColor" stroke-width="1.6" stroke-dasharray="2.5 2.5"/><path d="M9.3 6.6 4 12l5.3 5.4M14.7 6.6 20 12l-5.3 5.4" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></g>
+<g id="i-spin"><path d="M20 12a8 8 0 1 1-2.6-5.9" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M20.4 3.4v4.2h-4.2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></g>
+<g id="i-home"><path d="M12 4.4 4 10.6V20h5.4v-5.2h5.2V20H20v-9.4L12 4.4Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></g>
+<g id="i-info"><circle cx="12" cy="12" r="8.6" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M12 11v5.4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="12" cy="7.9" r="1.05" fill="currentColor"/></g>
+<g id="i-sliders"><path d="M4 7h10M18 7h2M4 17h4M12 17h8" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><circle cx="16" cy="7" r="2.2" fill="none" stroke="currentColor" stroke-width="1.7"/><circle cx="10" cy="17" r="2.2" fill="none" stroke="currentColor" stroke-width="1.7"/></g>
+<g id="i-trash"><path d="M5 7h14M10 7V4.8h4V7M6.6 7l.9 12.2c.05.9.8 1.6 1.7 1.6h5.6c.9 0 1.65-.7 1.7-1.6L17.4 7" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></g>
+<g id="i-shirt"><path d="M8.6 3.6 4 6.2l1.8 4 2-.9V20h8.4V9.3l2 .9 1.8-4-4.6-2.6a3.5 3.5 0 0 1-6.8 0Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></g>
+<g id="i-down"><path d="M12 4v11M7.4 10.8 12 15.4l4.6-4.6M4.6 19.6h14.8" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></g>
+</defs></svg>
+
+<div class="shell">
+  <nav class="rail" aria-label="Rooms">
+    <div class="mark">
+      <span class="wm">Fitting <em>Room</em></span>
+      <span class="sub">Wardrobe &amp; mirror</span>
+    </div>
+    <button class="navbtn" data-go="selfie"><svg class="ico" viewBox="0 0 24 24"><use href="#i-selfie"/></svg> Your figure <span class="n" data-count="angles">0/4</span></button>
+    <button class="navbtn" data-go="wardrobe"><svg class="ico" viewBox="0 0 24 24"><use href="#i-hanger"/></svg> Wardrobe <span class="n" data-count="items">0</span></button>
+    <button class="navbtn" data-go="mirror"><svg class="ico" viewBox="0 0 24 24"><use href="#i-mirror"/></svg> Mirror <span class="n" data-count="worn">0</span></button>
+    <button class="navbtn" data-go="occasion"><svg class="ico" viewBox="0 0 24 24"><use href="#i-cal"/></svg> Occasion</button>
+    <div class="railfoot">
+      <span class="statuschip" id="storechip"><span class="dot"></span><span id="storetext">Opening wardrobe…</span></span>
+      <button class="btn ghost sm" id="exportBtn" hidden><svg class="ico" viewBox="0 0 24 24"><use href="#i-down"/></svg> Export inventory</button>
+    </div>
+  </nav>
+
+  <header class="topbar">
+    <span class="wm">Fitting <em style="font-style:italic">Room</em></span>
+    <span class="statuschip" style="margin-left:auto" id="storechip2"><span class="dot"></span><span id="storetext2">…</span></span>
+  </header>
+
+  <div class="main">
+    <!-- ============ SELFIE ============ -->
+    <section class="view" id="v-selfie" aria-label="Your figure">
+      <div class="wrap">
+        <div class="vhead">
+          <div>
+            <div class="eyebrow">Step one</div>
+            <h2>Your figure</h2>
+            <p>Scan your body from four turns and the mirror shows your own shape, not a mannequin's. Close-up head shots go on top so the face is yours too.</p>
+          </div>
+        </div>
+
+        <div id="scanCard"></div>
+
+        <div class="subhead">
+          <h3>Head shots</h3>
+          <p>Four close-ups, wrapped onto the head.</p>
+        </div>
+        <div id="selfieNotice"></div>
+        <div class="angles" id="angles"></div>
+
+        <div class="card" style="margin-top:22px">
+          <h3>Measurements</h3>
+          <p style="color:var(--muted); font-size:13.5px; margin:3px 0 14px">These shape the mannequin, and set the real-world scale of a scan. Centimetres, as a tailor would take them.</p>
+          <div class="pgrid" id="bodyControls"></div>
+          <div class="row" style="margin-top:14px; gap:14px; flex-wrap:wrap">
+            <div class="field" style="max-width:180px">
+              <label for="skinInput">Skin tone</label>
+              <div class="row"><input type="color" id="skinInput" style="width:44px;height:34px;padding:2px;border:1px solid var(--line);border-radius:7px;background:var(--bg)"><span class="mono" id="skinHex" style="font-size:11px;color:var(--muted)"></span></div>
+            </div>
+            <button class="btn sm" id="skinFromPhoto">Sample from my photo</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ WARDROBE ============ -->
+    <section class="view" id="v-wardrobe" aria-label="Wardrobe">
+      <div class="wrap">
+        <div class="vhead">
+          <div>
+            <div class="eyebrow">Step two</div>
+            <h2>Wardrobe</h2>
+            <p>Photograph each garment on a plain surface. Every piece is tagged with a category, a formality mark from 1 to 5, and a warmth mark — that is what the occasion picker reads.</p>
+          </div>
+          <button class="btn pri" id="addItemBtn"><svg class="ico" viewBox="0 0 24 24"><use href="#i-plus"/></svg> Add a garment</button>
+        </div>
+        <div id="sampleNotice"></div>
+        <div class="wbar">
+          <div class="chips" id="catFilter"></div>
+          <input type="text" id="search" placeholder="Search by name, colour, fabric…" style="max-width:250px;margin-left:auto">
+        </div>
+        <div class="grid" id="wardrobeGrid"></div>
+      </div>
+    </section>
+
+    <!-- ============ MIRROR ============ -->
+    <section class="view flexcol mirror" id="v-mirror" aria-label="Mirror">
+      <div class="mirrorgrid">
+        <div class="stage" id="stage">
+          <div class="bulbs" aria-hidden="true"><i class="bulb"></i><i class="bulb"></i><i class="bulb"></i><i class="bulb"></i><i class="bulb"></i></div>
+          <div class="stagenote" id="stageNote" hidden></div>
+          <div class="stagebadge" id="mirrorBadge" hidden>Mirrored</div>
+          <div class="stagetools">
+            <button class="iconbtn" id="spinBtn" aria-pressed="false" title="Turn slowly" aria-label="Turn slowly"><svg class="ico" viewBox="0 0 24 24"><use href="#i-spin"/></svg></button>
+            <button class="iconbtn" id="flipBtn" aria-pressed="false" title="Mirror left and right" aria-label="Mirror left and right"><svg class="ico" viewBox="0 0 24 24"><use href="#i-flip"/></svg></button>
+            <button class="iconbtn" id="frontBtn" title="Face front" aria-label="Face front"><svg class="ico" viewBox="0 0 24 24"><use href="#i-home"/></svg></button>
+            <button class="iconbtn" id="tuneBtn" aria-pressed="false" title="Fit and framing" aria-label="Fit and framing"><svg class="ico" viewBox="0 0 24 24"><use href="#i-sliders"/></svg></button>
+          </div>
+        </div>
+        <div class="ruler" id="ruler" role="slider" tabindex="0" aria-label="Turntable angle" aria-valuemin="0" aria-valuemax="359" aria-valuenow="0" aria-valuetext="0 degrees, front">
+          <div class="rtrack" id="rtrack"></div>
+          <div class="rhead" id="rhead"></div>
+          <div class="rread mono" id="rread">0° FRONT</div>
+        </div>
+        <div class="panel" id="tunePanel">
+          <h4>Fit and framing</h4>
+          <div class="pgrid" id="tuneControls"></div>
+        </div>
+        <div class="mirrorbar">
+          <div class="wearing" id="wearing"></div>
+          <button class="btn sm" id="dressBtn"><svg class="ico" viewBox="0 0 24 24"><use href="#i-shirt"/></svg> Dress</button>
+          <button class="btn sm" id="undressBtn">Strip</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ OCCASION ============ -->
+    <section class="view" id="v-occasion" aria-label="Occasion">
+      <div class="wrap">
+        <div class="vhead">
+          <div>
+            <div class="eyebrow">Step three</div>
+            <h2>What's the occasion?</h2>
+            <p>Pick where you're going and what it's doing outside. Three outfits come back from your own wardrobe, ranked, each one saying why it earned the place.</p>
+          </div>
+        </div>
+        <div class="occgrid">
+          <div class="card" id="briefCard">
+            <h3>The brief</h3>
+            <div style="display:flex;flex-direction:column;gap:16px;margin-top:12px">
+              <div class="field">
+                <span class="flabel">Event</span>
+                <div class="chips" id="occChips"></div>
+              </div>
+              <div class="field">
+                <span class="flabel">Temperature</span>
+                <div class="scaleRow"><input type="range" id="tempRange" min="-5" max="38" step="1" value="19"><span class="val mono" id="tempVal">19 °C</span></div>
+              </div>
+              <div class="field">
+                <span class="flabel">Conditions</span>
+                <div class="chips" id="condChips"></div>
+              </div>
+              <div class="field">
+                <span class="flabel">Time</span>
+                <div class="chips" id="timeChips"></div>
+              </div>
+              <button class="btn pri" id="recBtn">Show me three outfits</button>
+            </div>
+          </div>
+          <div id="looks"></div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <nav class="tabbar" aria-label="Rooms">
+    <button class="tabbtn" data-go="selfie"><svg class="ico" viewBox="0 0 24 24"><use href="#i-selfie"/></svg>Figure</button>
+    <button class="tabbtn" data-go="wardrobe"><svg class="ico" viewBox="0 0 24 24"><use href="#i-hanger"/></svg>Wardrobe</button>
+    <button class="tabbtn" data-go="mirror"><svg class="ico" viewBox="0 0 24 24"><use href="#i-mirror"/></svg>Mirror</button>
+    <button class="tabbtn" data-go="occasion"><svg class="ico" viewBox="0 0 24 24"><use href="#i-cal"/></svg>Occasion</button>
+  </nav>
+</div>
+
+<div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
+  <div class="sheetbox" id="sheetBox"></div>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<input type="file" id="filePick" accept="image/*" hidden>

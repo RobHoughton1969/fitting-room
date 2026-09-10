@@ -1,0 +1,3620 @@
+<title>Fitting Room</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,500;0,6..96,600;1,6..96,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* ============================================================
+   Fitting Room — tokens
+   Light palette is complete on bare :root; dark redefines only
+   tokens, guarded so an explicit choice always wins.
+   ============================================================ */
+:root{
+  --bg:#ECEDF1;
+  --on-accent:#FFF8EE;
+  --bg-deep:#DFE1E8;
+  --surface:#FFFFFF;
+  --surface-2:#E6E8EE;
+  --surface-3:#DADDE5;
+  --line:#C9CDD8;
+  --line-soft:#DDE0E8;
+  --text:#191C24;
+  --text-2:#454B5A;
+  --muted:#666D7E;
+  --accent:#A96A16;
+  --accent-bright:#C9821F;
+  --accent-soft:#F4E6D0;
+  --accent-line:#E2C79B;
+  --good:#1F7A57;
+  --good-soft:#DCEFE6;
+  --bad:#A8323D;
+  --bad-soft:#F6DFE1;
+  --stage-1:#F6F5F3;
+  --stage-2:#DDDCE2;
+  --stage-glow:rgba(201,130,31,.28);
+  --shadow-s:0 1px 2px rgba(20,24,34,.07),0 2px 6px rgba(20,24,34,.05);
+  --shadow-m:0 2px 4px rgba(20,24,34,.06),0 10px 28px rgba(20,24,34,.10);
+  --tag-notch:#ECEDF1;
+  --scrim:rgba(16,19,25,.45);
+  --sk-1:#E1E4EB; --sk-2:#EDEFF3;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0E1117;
+    --on-accent:#15100A;
+    --bg-deep:#090B10;
+    --surface:#171B24;
+    --surface-2:#1E2330;
+    --surface-3:#262C3B;
+    --line:#2E3546;
+    --line-soft:#242A38;
+    --text:#E6E8EF;
+    --text-2:#B9BFCE;
+    --muted:#8B93A6;
+    --accent:#E0A458;
+    --accent-bright:#F0B96E;
+    --accent-soft:#37291A;
+    --accent-line:#5A452A;
+    --good:#5FBF95;
+    --good-soft:#16302A;
+    --bad:#E0707C;
+    --bad-soft:#361D22;
+    --stage-1:#1C2130;
+    --stage-2:#0C0E14;
+    --stage-glow:rgba(224,164,88,.20);
+    --shadow-s:0 1px 2px rgba(0,0,0,.4);
+    --shadow-m:0 2px 4px rgba(0,0,0,.35),0 14px 34px rgba(0,0,0,.45);
+    --tag-notch:#0E1117;
+    --scrim:rgba(4,6,10,.66);
+    --sk-1:#1E2330; --sk-2:#262C3B;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0E1117; --on-accent:#15100A; --bg-deep:#090B10; --surface:#171B24; --surface-2:#1E2330;
+  --surface-3:#262C3B; --line:#2E3546; --line-soft:#242A38; --text:#E6E8EF;
+  --text-2:#B9BFCE; --muted:#8B93A6; --accent:#E0A458; --accent-bright:#F0B96E;
+  --accent-soft:#37291A; --accent-line:#5A452A; --good:#5FBF95; --good-soft:#16302A;
+  --bad:#E0707C; --bad-soft:#361D22; --stage-1:#1C2130; --stage-2:#0C0E14;
+  --stage-glow:rgba(224,164,88,.20);
+  --shadow-s:0 1px 2px rgba(0,0,0,.4);
+  --shadow-m:0 2px 4px rgba(0,0,0,.35),0 14px 34px rgba(0,0,0,.45);
+  --tag-notch:#0E1117; --scrim:rgba(4,6,10,.66);
+  --sk-1:#1E2330; --sk-2:#262C3B;
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--bg); color:var(--text);
+  font-family:"Archivo","Helvetica Neue",Helvetica,Arial,sans-serif;
+  font-size:15px; line-height:1.5; -webkit-font-smoothing:antialiased;
+  overscroll-behavior-y:none;
+}
+h1,h2,h3{margin:0; text-wrap:balance}
+button{font:inherit; color:inherit}
+:focus-visible{outline:2px solid var(--accent); outline-offset:2px; border-radius:4px}
+.mono{font-family:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace; font-variant-numeric:tabular-nums}
+.serif{font-family:"Bodoni Moda","Didot","Times New Roman",serif}
+.vh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* ---------- shell ---------- */
+.shell{display:flex; min-height:100dvh; flex-direction:column}
+.rail{
+  display:none; flex-direction:column; gap:4px; width:238px; flex:0 0 238px;
+  padding:22px 16px 16px; border-right:1px solid var(--line-soft);
+  background:var(--surface); position:sticky; top:0; height:100dvh;
+}
+.mark{display:flex; flex-direction:column; gap:2px; padding:0 8px 20px}
+.mark .wm{font-family:"Bodoni Moda",serif; font-size:27px; line-height:1; letter-spacing:.005em}
+.mark .wm em{font-style:italic}
+.mark .sub{font-family:"IBM Plex Mono",monospace; font-size:10px; letter-spacing:.16em;
+  text-transform:uppercase; color:var(--muted)}
+.navbtn{
+  display:flex; align-items:center; gap:11px; padding:9px 10px; border-radius:8px;
+  border:1px solid transparent; background:none; cursor:pointer; text-align:left; width:100%;
+  color:var(--text-2); font-weight:500;
+}
+.navbtn:hover{background:var(--surface-2); color:var(--text)}
+.navbtn[aria-current="true"]{background:var(--accent-soft); border-color:var(--accent-line); color:var(--text)}
+.navbtn .ico{width:20px; height:20px; flex:0 0 20px; color:var(--accent)}
+.navbtn .n{font-family:"IBM Plex Mono",monospace; font-size:10px; color:var(--muted); margin-left:auto}
+.railfoot{margin-top:auto; padding:12px 8px 0; border-top:1px solid var(--line-soft); display:flex; flex-direction:column; gap:8px}
+
+.topbar{
+  display:flex; align-items:center; gap:12px; padding:12px 16px;
+  border-bottom:1px solid var(--line-soft); background:var(--surface); position:sticky; top:0; z-index:20;
+}
+.topbar .wm{font-family:"Bodoni Moda",serif; font-size:21px; line-height:1}
+.tabbar{
+  position:sticky; bottom:0; z-index:20; display:grid; grid-template-columns:repeat(4,1fr);
+  gap:2px; padding:6px 6px calc(6px + env(safe-area-inset-bottom)); background:var(--surface);
+  border-top:1px solid var(--line-soft);
+}
+.tabbtn{display:flex; flex-direction:column; align-items:center; gap:3px; padding:7px 2px;
+  border:0; background:none; border-radius:8px; cursor:pointer; color:var(--muted); font-size:11px; font-weight:600}
+.tabbtn .ico{width:21px;height:21px}
+.tabbtn[aria-current="true"]{color:var(--accent); background:var(--accent-soft)}
+.main{flex:1; min-width:0; display:flex; flex-direction:column}
+.view{display:none; flex:1; min-height:0}
+.view.on{display:block}
+.view.on.flexcol{display:flex; flex-direction:column}
+.wrap{max-width:1120px; margin:0 auto; padding:22px 16px 40px; width:100%}
+
+.vhead{display:flex; align-items:flex-end; justify-content:space-between; gap:16px; flex-wrap:wrap; margin-bottom:18px}
+.vhead h2{font-family:"Bodoni Moda",serif; font-size:30px; font-weight:500; line-height:1.05}
+.vhead p{margin:5px 0 0; color:var(--muted); max-width:62ch; font-size:14px}
+.eyebrow{font-family:"IBM Plex Mono",monospace; font-size:10px; letter-spacing:.18em;
+  text-transform:uppercase; color:var(--accent); margin-bottom:6px}
+
+/* ---------- controls ---------- */
+.btn{
+  display:inline-flex; align-items:center; justify-content:center; gap:7px;
+  padding:8px 14px; border-radius:8px; border:1px solid var(--line);
+  background:var(--surface); cursor:pointer; font-weight:600; font-size:14px;
+  transition:background .12s, border-color .12s, transform .06s;
+}
+.btn:hover{background:var(--surface-2)}
+.btn:active{transform:translateY(1px)}
+.btn.pri{background:var(--accent); border-color:var(--accent); color:var(--on-accent)}
+.btn.pri:hover{background:var(--accent-bright); border-color:var(--accent-bright)}
+.btn.ghost{background:none; border-color:transparent; color:var(--muted); font-weight:500}
+.btn.ghost:hover{background:var(--surface-2); color:var(--text)}
+.btn.danger{color:var(--bad); border-color:var(--line)}
+.btn.danger:hover{background:var(--bad-soft)}
+.btn.sm{padding:5px 10px; font-size:13px; border-radius:7px}
+.btn[disabled]{opacity:.45; cursor:not-allowed}
+.btn .ico{width:16px;height:16px}
+
+.chips{display:flex; flex-wrap:wrap; gap:6px}
+.chip{
+  padding:5px 11px; border-radius:999px; border:1px solid var(--line);
+  background:var(--surface); cursor:pointer; font-size:13px; font-weight:500; color:var(--text-2);
+}
+.chip:hover{border-color:var(--accent-line)}
+.chip[aria-pressed="true"]{background:var(--accent-soft); border-color:var(--accent); color:var(--text)}
+.field{display:flex; flex-direction:column; gap:5px}
+.field > label, .flabel{font-family:"IBM Plex Mono",monospace; font-size:10px; letter-spacing:.14em;
+  text-transform:uppercase; color:var(--muted)}
+input[type=text], input[type=number], select, textarea{
+  width:100%; padding:8px 10px; border-radius:7px; border:1px solid var(--line);
+  background:var(--bg); color:var(--text); font:inherit; font-size:14px;
+}
+textarea{resize:vertical; min-height:56px}
+input[type=range]{width:100%; accent-color:var(--accent); background:transparent}
+.row{display:flex; gap:10px; align-items:center}
+.grow{flex:1; min-width:0}
+
+.statuschip{
+  display:inline-flex; align-items:center; gap:7px; padding:5px 9px; border-radius:7px;
+  background:var(--surface-2); border:1px solid var(--line-soft);
+  font-family:"IBM Plex Mono",monospace; font-size:10.5px; color:var(--muted); letter-spacing:.04em;
+}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--muted); flex:0 0 6px}
+.dot.on{background:var(--good)}
+.dot.local{background:var(--accent)}
+
+.notice{
+  display:flex; gap:11px; align-items:flex-start; padding:11px 13px; border-radius:9px;
+  background:var(--accent-soft); border:1px solid var(--accent-line); font-size:13.5px; color:var(--text-2);
+  margin-bottom:18px;
+}
+.notice .ico{width:17px;height:17px;flex:0 0 17px;color:var(--accent);margin-top:1px}
+.notice b{color:var(--text)}
+
+/* ---------- selfie ---------- */
+.angles{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:14px}
+.angle{
+  border:1px solid var(--line); border-radius:12px; background:var(--surface);
+  overflow:hidden; display:flex; flex-direction:column;
+}
+.angle .ph{
+  aspect-ratio:3/4; background:
+    repeating-linear-gradient(45deg,var(--surface-2) 0 8px,var(--surface) 8px 16px);
+  position:relative; display:grid; place-items:center;
+}
+.angle .ph img{width:100%;height:100%;object-fit:cover;display:block}
+.angle .ph .glyph{width:52px;height:52px;color:var(--line); opacity:.9}
+.angle .cap{display:flex; align-items:center; justify-content:space-between; gap:8px; padding:9px 11px;
+  border-top:1px solid var(--line-soft)}
+.angle .cap .nm{font-weight:600; font-size:13.5px}
+.angle .cap .deg{font-family:"IBM Plex Mono",monospace; font-size:10.5px; color:var(--muted)}
+.angle .acts{display:flex; gap:6px; padding:0 11px 11px}
+.angle.has .ph{background:var(--surface-2)}
+
+.camwrap{position:relative; border-radius:12px; overflow:hidden; background:#000; aspect-ratio:3/4; max-height:62vh; margin:0 auto}
+.camwrap video{width:100%;height:100%;object-fit:cover;display:block}
+.camguide{position:absolute; inset:0; pointer-events:none}
+.camhint{position:absolute; left:0; right:0; bottom:0; padding:12px 14px;
+  background:linear-gradient(transparent,rgba(0,0,0,.72)); color:#fff; font-size:13.5px}
+
+/* ---------- wardrobe ---------- */
+.wbar{display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-bottom:16px}
+.grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(158px,1fr)); gap:14px}
+.tag{
+  position:relative; border:1px solid var(--line); border-radius:10px; background:var(--surface);
+  overflow:hidden; text-align:left; cursor:pointer; padding:0; display:flex; flex-direction:column;
+  transition:border-color .12s, box-shadow .12s, transform .08s;
+}
+.tag:hover{border-color:var(--accent-line); box-shadow:var(--shadow-m); transform:translateY(-1px)}
+.tag[aria-pressed="true"]{border-color:var(--accent); box-shadow:0 0 0 1px var(--accent)}
+.tag .sw{aspect-ratio:1/1; background:var(--surface-2); position:relative; overflow:hidden}
+.tag .sw img{width:100%;height:100%;object-fit:cover;display:block}
+.tag .hole{
+  position:absolute; top:9px; left:9px; width:11px; height:11px; border-radius:50%;
+  background:var(--tag-notch); box-shadow:inset 0 0 0 1px rgba(0,0,0,.18); z-index:2;
+}
+.tag .worn{
+  position:absolute; top:7px; right:7px; z-index:2; padding:2px 6px; border-radius:5px;
+  background:var(--scrim); color:#fff; font-family:"IBM Plex Mono",monospace; font-size:9.5px;
+}
+.tag .body{padding:9px 10px 11px; display:flex; flex-direction:column; gap:3px; flex:1}
+.tag .nm{font-weight:600; font-size:13.5px; line-height:1.25; overflow-wrap:anywhere}
+.tag .spec{font-family:"IBM Plex Mono",monospace; font-size:10px; color:var(--muted);
+  letter-spacing:.03em; display:flex; align-items:center; gap:5px; margin-top:auto; padding-top:5px}
+.tag .swatchdot{width:9px;height:9px;border-radius:2px;border:1px solid rgba(128,128,128,.4); flex:0 0 9px}
+.tag .onbody{position:absolute; inset:auto 0 0 0; height:3px; background:var(--accent)}
+
+.empty{
+  border:1px dashed var(--line); border-radius:12px; padding:34px 22px; text-align:center;
+  color:var(--muted); background:var(--surface);
+}
+.empty h3{font-family:"Bodoni Moda",serif; font-size:21px; color:var(--text); margin-bottom:6px; font-weight:500}
+
+/* ---------- sheet / modal ---------- */
+.sheet{
+  position:fixed; inset:0; z-index:60; display:none; align-items:flex-end; justify-content:center;
+  background:var(--scrim); backdrop-filter:blur(2px);
+}
+.sheet.on{display:flex}
+.sheetbox{
+  background:var(--surface); width:100%; max-width:560px; max-height:92dvh; overflow:auto;
+  border-radius:16px 16px 0 0; border:1px solid var(--line); border-bottom:0;
+  padding:18px 18px calc(18px + env(safe-area-inset-bottom));
+  display:flex; flex-direction:column; gap:14px;
+}
+.sheethead{display:flex; align-items:center; justify-content:space-between; gap:12px}
+.sheethead h3{font-family:"Bodoni Moda",serif; font-size:22px; font-weight:500}
+.f2{display:grid; grid-template-columns:1fr 1fr; gap:12px}
+.scaleRow{display:flex; align-items:center; gap:10px}
+.scaleRow .val{font-family:"IBM Plex Mono",monospace; font-size:11px; color:var(--muted); min-width:88px; text-align:right}
+.previewimg{width:100%; aspect-ratio:4/3; object-fit:contain; background:var(--surface-2);
+  border-radius:9px; border:1px solid var(--line-soft)}
+
+/* ---------- mirror ---------- */
+/* display is owned by .view / .view.on.flexcol — never set it here, or the
+   mirror stays painted behind the other rooms */
+.mirror{min-height:0}
+
+/* ---------- body scan ---------- */
+.measgrid{display:grid; grid-template-columns:repeat(auto-fit,minmax(96px,1fr)); gap:1px;
+  background:var(--line-soft); border:1px solid var(--line-soft); border-radius:9px;
+  overflow:hidden; margin-top:14px}
+.meas{background:var(--surface); padding:9px 11px; display:flex; flex-direction:column; gap:1px}
+.meas .k{font-family:"IBM Plex Mono",monospace; font-size:9.5px; letter-spacing:.14em;
+  text-transform:uppercase; color:var(--muted)}
+.meas .v{font-size:21px; font-weight:600; line-height:1.15; font-variant-numeric:tabular-nums}
+.meas .v i{font-style:normal; font-size:11px; color:var(--muted); margin-left:2px; font-weight:500}
+.scanrow{margin-top:16px; grid-template-columns:repeat(auto-fit,minmax(132px,1fr))}
+.subhead{display:flex; align-items:baseline; gap:10px; margin:26px 0 12px}
+.subhead h3{font-family:"Bodoni Moda",serif; font-size:22px; font-weight:500}
+.subhead p{margin:0; color:var(--muted); font-size:13.5px}
+.mirrorgrid{display:flex; flex-direction:column; flex:1; min-height:0}
+.stage{
+  position:relative; flex:1; min-height:340px;
+  background:
+    radial-gradient(120% 82% at 50% 8%, var(--stage-glow) 0%, transparent 58%),
+    linear-gradient(178deg, var(--stage-1) 0%, var(--stage-2) 100%);
+  overflow:hidden; touch-action:none; cursor:grab;
+}
+.stage.drag{cursor:grabbing}
+.stage canvas{display:block; width:100%; height:100%}
+.stage.mirrored canvas{transform:scaleX(-1)}
+.bulbs{position:absolute; top:0; left:0; right:0; display:flex; justify-content:center; gap:26px; padding:9px 0; pointer-events:none}
+.bulb{width:7px;height:7px;border-radius:50%;background:var(--accent);
+  box-shadow:0 0 9px 3px var(--stage-glow); opacity:.85}
+.stagebadge{
+  position:absolute; top:14px; right:14px; padding:4px 9px; border-radius:6px;
+  background:var(--scrim); color:#fff; font-family:"IBM Plex Mono",monospace; font-size:10px;
+  letter-spacing:.12em; text-transform:uppercase;
+}
+.stagenote{
+  position:absolute; left:14px; top:14px; max-width:230px; padding:8px 10px; border-radius:8px;
+  background:var(--scrim); color:#fff; font-size:12px; line-height:1.4;
+}
+.stagetools{position:absolute; right:12px; bottom:12px; display:flex; flex-direction:column; gap:7px}
+.iconbtn{
+  width:38px;height:38px; display:grid; place-items:center; border-radius:9px;
+  border:1px solid var(--line); background:var(--surface); cursor:pointer; box-shadow:var(--shadow-s);
+}
+.iconbtn:hover{background:var(--surface-2)}
+.iconbtn[aria-pressed="true"]{background:var(--accent); border-color:var(--accent); color:var(--on-accent)}
+.iconbtn .ico{width:18px;height:18px}
+
+/* turntable ruler */
+.ruler{position:relative; height:46px; border-top:1px solid var(--line-soft);
+  border-bottom:1px solid var(--line-soft); background:var(--surface); user-select:none; touch-action:none; cursor:ew-resize}
+.rtrack{position:absolute; inset:0}
+.rtick{position:absolute; bottom:16px; width:1px; background:var(--line)}
+.rtick.maj{background:var(--muted)}
+.rlab{position:absolute; bottom:2px; transform:translateX(-50%);
+  font-family:"IBM Plex Mono",monospace; font-size:9px; letter-spacing:.1em; color:var(--muted); white-space:nowrap}
+.rhead{position:absolute; top:0; bottom:0; width:2px; background:var(--accent); transform:translateX(-1px)}
+.rhead::before{
+  content:""; position:absolute; top:0; left:50%; transform:translateX(-50%);
+  border-left:5px solid transparent; border-right:5px solid transparent; border-top:6px solid var(--accent);
+}
+.rread{
+  position:absolute; top:5px; transform:translateX(-50%); padding:1px 6px; border-radius:5px;
+  background:var(--accent); color:var(--on-accent); font-family:"IBM Plex Mono",monospace; font-size:10px; white-space:nowrap;
+}
+.mirrorbar{
+  display:flex; gap:8px; align-items:center; padding:10px 14px; background:var(--surface);
+  border-top:1px solid var(--line-soft); overflow-x:auto; flex-wrap:nowrap;
+}
+.wearing{display:flex; gap:7px; align-items:center; flex:1; min-width:0; overflow-x:auto; padding-bottom:2px}
+.wearing, .lookpieces, .mirrorbar{scrollbar-width:thin; scrollbar-color:var(--line) transparent}
+.wearing::-webkit-scrollbar, .lookpieces::-webkit-scrollbar, .mirrorbar::-webkit-scrollbar{height:5px}
+.wearing::-webkit-scrollbar-track, .lookpieces::-webkit-scrollbar-track, .mirrorbar::-webkit-scrollbar-track{background:transparent}
+.wearing::-webkit-scrollbar-thumb, .lookpieces::-webkit-scrollbar-thumb, .mirrorbar::-webkit-scrollbar-thumb{background:var(--line); border-radius:3px}
+.wchip{
+  display:inline-flex; align-items:center; gap:6px; padding:4px 8px 4px 4px; border-radius:999px;
+  border:1px solid var(--line); background:var(--bg); font-size:12.5px; white-space:nowrap; flex:0 0 auto;
+}
+.wchip img{width:22px;height:22px;border-radius:50%;object-fit:cover}
+.wchip .x{border:0;background:none;cursor:pointer;color:var(--muted);padding:0 2px;font-size:15px;line-height:1}
+.wchip .x:hover{color:var(--bad)}
+.panel{background:var(--surface); border-top:1px solid var(--line-soft); padding:14px; display:none}
+.panel.on{display:block}
+.panel h4{font-family:"IBM Plex Mono",monospace; font-size:10px; letter-spacing:.16em;
+  text-transform:uppercase; color:var(--muted); margin:0 0 10px; font-weight:500}
+.pgrid{display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:16px}
+
+/* ---------- occasion ---------- */
+.occgrid{display:grid; gap:20px; grid-template-columns:1fr}
+.card{background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:16px}
+.card h3{font-family:"Bodoni Moda",serif; font-size:19px; font-weight:500; margin-bottom:3px}
+.look{
+  background:var(--surface); border:1px solid var(--line); border-radius:12px; overflow:hidden;
+  display:flex; flex-direction:column;
+}
+.look + .look{margin-top:14px}
+.lookhead{display:flex; align-items:baseline; justify-content:space-between; gap:12px; padding:13px 15px 9px}
+.lookhead .rank{font-family:"IBM Plex Mono",monospace; font-size:10px; color:var(--accent); letter-spacing:.16em}
+.lookhead h3{font-family:"Bodoni Moda",serif; font-size:20px; font-weight:500; line-height:1.15}
+.lookfit{font-family:"IBM Plex Mono",monospace; font-size:11px; color:var(--muted); white-space:nowrap}
+.lookpieces{display:flex; gap:9px; padding:2px 15px 12px; overflow-x:auto}
+.piece{flex:0 0 84px; text-align:left}
+.piece .sw{width:84px;height:84px;border-radius:8px;overflow:hidden;background:var(--surface-2);border:1px solid var(--line-soft)}
+.piece .sw img{width:100%;height:100%;object-fit:cover;display:block}
+.piece .role{font-family:"IBM Plex Mono",monospace; font-size:9px; letter-spacing:.12em;
+  text-transform:uppercase; color:var(--muted); margin-top:5px}
+.piece .nm{font-size:12px; line-height:1.25; margin-top:1px}
+.why{border-top:1px solid var(--line-soft); padding:11px 15px; display:flex; flex-direction:column; gap:5px}
+.why li{font-size:13px; color:var(--text-2); display:flex; gap:8px; align-items:flex-start; list-style:none}
+.why ul{margin:0;padding:0}
+.why .mk{color:var(--accent); font-family:"IBM Plex Mono",monospace; font-size:10px; margin-top:3px}
+.why .mk.warn{color:var(--bad)}
+.lookacts{display:flex; gap:8px; padding:0 15px 14px; flex-wrap:wrap}
+.meter{height:5px; border-radius:3px; background:var(--surface-3); overflow:hidden; width:78px}
+.meter i{display:block; height:100%; background:var(--accent)}
+
+.skel{background:linear-gradient(90deg,var(--sk-1) 0%,var(--sk-2) 50%,var(--sk-1) 100%);
+  background-size:200% 100%; animation:sh 1.4s linear infinite; border-radius:8px}
+@keyframes sh{to{background-position:-200% 0}}
+.toast{
+  position:fixed; left:50%; bottom:calc(76px + env(safe-area-inset-bottom)); transform:translateX(-50%);
+  background:var(--text); color:var(--bg); padding:9px 15px; border-radius:9px; font-size:13.5px;
+  z-index:90; box-shadow:var(--shadow-m); opacity:0; pointer-events:none; transition:opacity .18s, transform .18s;
+}
+.toast.on{opacity:1; transform:translateX(-50%) translateY(-4px)}
+
+@media (min-width:900px){
+  .shell{flex-direction:row}
+  .rail{display:flex}
+  .topbar,.tabbar{display:none}
+  .toast{bottom:24px}
+  .occgrid{grid-template-columns:340px 1fr; align-items:start}
+  .wrap{padding:28px 26px 46px}
+  .vhead h2{font-size:34px}
+}
+@media (prefers-reduced-motion:reduce){
+  *{animation-duration:.001ms !important; transition-duration:.001ms !important}
+}
+</style>
+
+<svg class="vh" aria-hidden="true"><defs>
+<g id="i-selfie"><circle cx="12" cy="8.5" r="4" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M4.5 20.5c1.4-3.6 4.2-5.5 7.5-5.5s6.1 1.9 7.5 5.5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></g>
+<g id="i-hanger"><path d="M12 6.2a2.1 2.1 0 1 1 2.1 2.1c0 1.3-2.1 1.3-2.1 2.6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M12 11.2 3.4 17.1c-.8.6-.4 1.9.6 1.9h16c1 0 1.4-1.3.6-1.9L12 11.2Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></g>
+<g id="i-mirror"><rect x="5.5" y="2.8" width="13" height="15.4" rx="6.5" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M9 21.2h6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M12 6.2v9.2" stroke="currentColor" stroke-width="1.3" stroke-dasharray="2 2.4"/></g>
+<g id="i-cal"><rect x="3.4" y="5" width="17.2" height="15.6" rx="2.4" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M3.4 9.6h17.2M8 3.4v3.2M16 3.4v3.2" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><circle cx="12" cy="14.6" r="1.8" fill="currentColor"/></g>
+<g id="i-cam"><path d="M3.4 8.4c0-1.1.9-2 2-2h2.3l1.2-2h6.2l1.2 2h2.3c1.1 0 2 .9 2 2v9.2c0 1.1-.9 2-2 2H5.4c-1.1 0-2-.9-2-2V8.4Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><circle cx="12" cy="13" r="3.6" fill="none" stroke="currentColor" stroke-width="1.7"/></g>
+<g id="i-plus"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></g>
+<g id="i-flip"><path d="M12 3v18" stroke="currentColor" stroke-width="1.6" stroke-dasharray="2.5 2.5"/><path d="M9.3 6.6 4 12l5.3 5.4M14.7 6.6 20 12l-5.3 5.4" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></g>
+<g id="i-spin"><path d="M20 12a8 8 0 1 1-2.6-5.9" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M20.4 3.4v4.2h-4.2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></g>
+<g id="i-home"><path d="M12 4.4 4 10.6V20h5.4v-5.2h5.2V20H20v-9.4L12 4.4Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></g>
+<g id="i-info"><circle cx="12" cy="12" r="8.6" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M12 11v5.4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="12" cy="7.9" r="1.05" fill="currentColor"/></g>
+<g id="i-sliders"><path d="M4 7h10M18 7h2M4 17h4M12 17h8" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><circle cx="16" cy="7" r="2.2" fill="none" stroke="currentColor" stroke-width="1.7"/><circle cx="10" cy="17" r="2.2" fill="none" stroke="currentColor" stroke-width="1.7"/></g>
+<g id="i-trash"><path d="M5 7h14M10 7V4.8h4V7M6.6 7l.9 12.2c.05.9.8 1.6 1.7 1.6h5.6c.9 0 1.65-.7 1.7-1.6L17.4 7" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></g>
+<g id="i-shirt"><path d="M8.6 3.6 4 6.2l1.8 4 2-.9V20h8.4V9.3l2 .9 1.8-4-4.6-2.6a3.5 3.5 0 0 1-6.8 0Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></g>
+<g id="i-down"><path d="M12 4v11M7.4 10.8 12 15.4l4.6-4.6M4.6 19.6h14.8" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></g>
+</defs></svg>
+
+<div class="shell">
+  <nav class="rail" aria-label="Rooms">
+    <div class="mark">
+      <span class="wm">Fitting <em>Room</em></span>
+      <span class="sub">Wardrobe &amp; mirror</span>
+    </div>
+    <button class="navbtn" data-go="selfie"><svg class="ico" viewBox="0 0 24 24"><use href="#i-selfie"/></svg> Your figure <span class="n" data-count="angles">0/4</span></button>
+    <button class="navbtn" data-go="wardrobe"><svg class="ico" viewBox="0 0 24 24"><use href="#i-hanger"/></svg> Wardrobe <span class="n" data-count="items">0</span></button>
+    <button class="navbtn" data-go="mirror"><svg class="ico" viewBox="0 0 24 24"><use href="#i-mirror"/></svg> Mirror <span class="n" data-count="worn">0</span></button>
+    <button class="navbtn" data-go="occasion"><svg class="ico" viewBox="0 0 24 24"><use href="#i-cal"/></svg> Occasion</button>
+    <div class="railfoot">
+      <span class="statuschip" id="storechip"><span class="dot"></span><span id="storetext">Opening wardrobe…</span></span>
+      <button class="btn ghost sm" id="exportBtn" hidden><svg class="ico" viewBox="0 0 24 24"><use href="#i-down"/></svg> Export inventory</button>
+    </div>
+  </nav>
+
+  <header class="topbar">
+    <span class="wm">Fitting <em style="font-style:italic">Room</em></span>
+    <span class="statuschip" style="margin-left:auto" id="storechip2"><span class="dot"></span><span id="storetext2">…</span></span>
+  </header>
+
+  <div class="main">
+    <!-- ============ SELFIE ============ -->
+    <section class="view" id="v-selfie" aria-label="Your figure">
+      <div class="wrap">
+        <div class="vhead">
+          <div>
+            <div class="eyebrow">Step one</div>
+            <h2>Your figure</h2>
+            <p>Scan your body from four turns and the mirror shows your own shape, not a mannequin's. Close-up head shots go on top so the face is yours too.</p>
+          </div>
+        </div>
+
+        <div id="scanCard"></div>
+
+        <div class="subhead">
+          <h3>Head shots</h3>
+          <p>Four close-ups, wrapped onto the head.</p>
+        </div>
+        <div id="selfieNotice"></div>
+        <div class="angles" id="angles"></div>
+
+        <div class="card" style="margin-top:22px">
+          <h3>Measurements</h3>
+          <p style="color:var(--muted); font-size:13.5px; margin:3px 0 14px">These shape the mannequin, and set the real-world scale of a scan. Centimetres, as a tailor would take them.</p>
+          <div class="pgrid" id="bodyControls"></div>
+          <div class="row" style="margin-top:14px; gap:14px; flex-wrap:wrap">
+            <div class="field" style="max-width:180px">
+              <label for="skinInput">Skin tone</label>
+              <div class="row"><input type="color" id="skinInput" style="width:44px;height:34px;padding:2px;border:1px solid var(--line);border-radius:7px;background:var(--bg)"><span class="mono" id="skinHex" style="font-size:11px;color:var(--muted)"></span></div>
+            </div>
+            <button class="btn sm" id="skinFromPhoto">Sample from my photo</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ WARDROBE ============ -->
+    <section class="view" id="v-wardrobe" aria-label="Wardrobe">
+      <div class="wrap">
+        <div class="vhead">
+          <div>
+            <div class="eyebrow">Step two</div>
+            <h2>Wardrobe</h2>
+            <p>Photograph each garment on a plain surface. Every piece is tagged with a category, a formality mark from 1 to 5, and a warmth mark — that is what the occasion picker reads.</p>
+          </div>
+          <button class="btn pri" id="addItemBtn"><svg class="ico" viewBox="0 0 24 24"><use href="#i-plus"/></svg> Add a garment</button>
+        </div>
+        <div id="sampleNotice"></div>
+        <div class="wbar">
+          <div class="chips" id="catFilter"></div>
+          <input type="text" id="search" placeholder="Search by name, colour, fabric…" style="max-width:250px;margin-left:auto">
+        </div>
+        <div class="grid" id="wardrobeGrid"></div>
+      </div>
+    </section>
+
+    <!-- ============ MIRROR ============ -->
+    <section class="view flexcol mirror" id="v-mirror" aria-label="Mirror">
+      <div class="mirrorgrid">
+        <div class="stage" id="stage">
+          <div class="bulbs" aria-hidden="true"><i class="bulb"></i><i class="bulb"></i><i class="bulb"></i><i class="bulb"></i><i class="bulb"></i></div>
+          <div class="stagenote" id="stageNote" hidden></div>
+          <div class="stagebadge" id="mirrorBadge" hidden>Mirrored</div>
+          <div class="stagetools">
+            <button class="iconbtn" id="spinBtn" aria-pressed="false" title="Turn slowly" aria-label="Turn slowly"><svg class="ico" viewBox="0 0 24 24"><use href="#i-spin"/></svg></button>
+            <button class="iconbtn" id="flipBtn" aria-pressed="false" title="Mirror left and right" aria-label="Mirror left and right"><svg class="ico" viewBox="0 0 24 24"><use href="#i-flip"/></svg></button>
+            <button class="iconbtn" id="frontBtn" title="Face front" aria-label="Face front"><svg class="ico" viewBox="0 0 24 24"><use href="#i-home"/></svg></button>
+            <button class="iconbtn" id="tuneBtn" aria-pressed="false" title="Fit and framing" aria-label="Fit and framing"><svg class="ico" viewBox="0 0 24 24"><use href="#i-sliders"/></svg></button>
+          </div>
+        </div>
+        <div class="ruler" id="ruler" role="slider" tabindex="0" aria-label="Turntable angle" aria-valuemin="0" aria-valuemax="359" aria-valuenow="0" aria-valuetext="0 degrees, front">
+          <div class="rtrack" id="rtrack"></div>
+          <div class="rhead" id="rhead"></div>
+          <div class="rread mono" id="rread">0° FRONT</div>
+        </div>
+        <div class="panel" id="tunePanel">
+          <h4>Fit and framing</h4>
+          <div class="pgrid" id="tuneControls"></div>
+        </div>
+        <div class="mirrorbar">
+          <div class="wearing" id="wearing"></div>
+          <button class="btn sm" id="dressBtn"><svg class="ico" viewBox="0 0 24 24"><use href="#i-shirt"/></svg> Dress</button>
+          <button class="btn sm" id="undressBtn">Strip</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ OCCASION ============ -->
+    <section class="view" id="v-occasion" aria-label="Occasion">
+      <div class="wrap">
+        <div class="vhead">
+          <div>
+            <div class="eyebrow">Step three</div>
+            <h2>What's the occasion?</h2>
+            <p>Pick where you're going and what it's doing outside. Three outfits come back from your own wardrobe, ranked, each one saying why it earned the place.</p>
+          </div>
+        </div>
+        <div class="occgrid">
+          <div class="card" id="briefCard">
+            <h3>The brief</h3>
+            <div style="display:flex;flex-direction:column;gap:16px;margin-top:12px">
+              <div class="field">
+                <span class="flabel">Event</span>
+                <div class="chips" id="occChips"></div>
+              </div>
+              <div class="field">
+                <span class="flabel">Temperature</span>
+                <div class="scaleRow"><input type="range" id="tempRange" min="-5" max="38" step="1" value="19"><span class="val mono" id="tempVal">19 °C</span></div>
+              </div>
+              <div class="field">
+                <span class="flabel">Conditions</span>
+                <div class="chips" id="condChips"></div>
+              </div>
+              <div class="field">
+                <span class="flabel">Time</span>
+                <div class="chips" id="timeChips"></div>
+              </div>
+              <button class="btn pri" id="recBtn">Show me three outfits</button>
+            </div>
+          </div>
+          <div id="looks"></div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <nav class="tabbar" aria-label="Rooms">
+    <button class="tabbtn" data-go="selfie"><svg class="ico" viewBox="0 0 24 24"><use href="#i-selfie"/></svg>Figure</button>
+    <button class="tabbtn" data-go="wardrobe"><svg class="ico" viewBox="0 0 24 24"><use href="#i-hanger"/></svg>Wardrobe</button>
+    <button class="tabbtn" data-go="mirror"><svg class="ico" viewBox="0 0 24 24"><use href="#i-mirror"/></svg>Mirror</button>
+    <button class="tabbtn" data-go="occasion"><svg class="ico" viewBox="0 0 24 24"><use href="#i-cal"/></svg>Occasion</button>
+  </nav>
+</div>
+
+<div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
+  <div class="sheetbox" id="sheetBox"></div>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<input type="file" id="filePick" accept="image/*" hidden>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+<script>
+"use strict";
+/* ==========================================================
+   Fitting Room
+   1. Catalogue   2. Storage   3. Figure (three.js)
+   4. Interface   5. Occasion engine
+   ========================================================== */
+
+/* ----------------------------- 1. CATALOGUE ----------------------------- */
+
+const CATS = [
+  { id:"top",       label:"Tops",      one:"Top",       slot:"top" },
+  { id:"bottom",    label:"Bottoms",   one:"Bottom",    slot:"bottom" },
+  { id:"dress",     label:"Dresses",   one:"Dress",     slot:"dress" },
+  { id:"outerwear", label:"Outerwear", one:"Outerwear", slot:"outerwear" },
+  { id:"shoes",     label:"Shoes",     one:"Shoes",     slot:"shoes" },
+  { id:"headwear",  label:"Headwear",  one:"Headwear",  slot:"headwear" },
+  { id:"bag",       label:"Bags",      one:"Bag",       slot:"bag" },
+  { id:"accessory", label:"Accessories", one:"Accessory", slot:"accessory" }
+];
+const CAT_BY_ID = Object.fromEntries(CATS.map(c => [c.id, c]));
+
+/* f = formality 1..5, w = warmth 1..5, plus the shape hints the mannequin needs */
+const SUBTYPES = {
+  top: [
+    ["T-shirt",{f:1,w:1,sleeve:"short",hem:"hip"}],
+    ["Polo shirt",{f:2,w:1,sleeve:"short",hem:"hip"}],
+    ["Oxford shirt",{f:4,w:2,sleeve:"long",hem:"hip",collar:true}],
+    ["Linen shirt",{f:3,w:1,sleeve:"long",hem:"hip",collar:true}],
+    ["Blouse",{f:4,w:1,sleeve:"long",hem:"hip"}],
+    ["Knit jumper",{f:3,w:4,sleeve:"long",hem:"hip",thick:1.6}],
+    ["Cardigan",{f:3,w:3,sleeve:"long",hem:"hip",thick:1.8,open:true}],
+    ["Hoodie",{f:1,w:3,sleeve:"long",hem:"hip",thick:2}],
+    ["Sweatshirt",{f:1,w:3,sleeve:"long",hem:"hip",thick:1.8}],
+    ["Tank top",{f:1,w:1,sleeve:"none",hem:"hip"}],
+    ["Waistcoat",{f:5,w:2,sleeve:"none",hem:"waist"}],
+    ["Silk top",{f:4,w:1,sleeve:"short",hem:"hip"}]
+  ],
+  bottom: [
+    ["Jeans",{f:2,w:3,len:"ankle"}],
+    ["Chinos",{f:3,w:2,len:"ankle"}],
+    ["Wool trousers",{f:5,w:3,len:"ankle"}],
+    ["Suit trousers",{f:5,w:3,len:"ankle"}],
+    ["Linen trousers",{f:3,w:1,len:"ankle"}],
+    ["Shorts",{f:1,w:1,len:"knee"}],
+    ["Chino shorts",{f:2,w:1,len:"knee"}],
+    ["Skirt",{f:3,w:1,len:"knee",flare:1.5}],
+    ["Pencil skirt",{f:4,w:2,len:"knee",flare:1}],
+    ["Maxi skirt",{f:3,w:2,len:"floor",flare:1.6}],
+    ["Track pants",{f:1,w:3,len:"ankle"}],
+    ["Leggings",{f:1,w:2,len:"ankle",slim:true}]
+  ],
+  dress: [
+    ["Day dress",{f:3,w:1,len:"knee",flare:1.4,sleeve:"short"}],
+    ["Sundress",{f:2,w:1,len:"knee",flare:1.5,sleeve:"none"}],
+    ["Shirt dress",{f:3,w:2,len:"knee",flare:1.2,sleeve:"long"}],
+    ["Cocktail dress",{f:4,w:1,len:"knee",flare:1.2,sleeve:"none"}],
+    ["Evening gown",{f:5,w:1,len:"floor",flare:1.7,sleeve:"none"}],
+    ["Jumpsuit",{f:3,w:2,len:"ankle",flare:1,sleeve:"none",trousers:true}]
+  ],
+  outerwear: [
+    ["Blazer",{f:5,w:3,sleeve:"long",hem:"hip",thick:2.4,open:true}],
+    ["Suit jacket",{f:5,w:3,sleeve:"long",hem:"hip",thick:2.4,open:true}],
+    ["Overcoat",{f:5,w:5,sleeve:"long",hem:"thigh",thick:3.4,open:true}],
+    ["Trench coat",{f:4,w:4,sleeve:"long",hem:"thigh",thick:3,open:true,rain:true}],
+    ["Raincoat",{f:2,w:3,sleeve:"long",hem:"thigh",thick:2.8,rain:true}],
+    ["Leather jacket",{f:2,w:3,sleeve:"long",hem:"waist",thick:2.6,open:true}],
+    ["Denim jacket",{f:1,w:2,sleeve:"long",hem:"waist",thick:2.4,open:true}],
+    ["Chore jacket",{f:2,w:3,sleeve:"long",hem:"hip",thick:2.6,open:true}],
+    ["Puffer jacket",{f:1,w:5,sleeve:"long",hem:"hip",thick:4.6}],
+    ["Parka",{f:1,w:5,sleeve:"long",hem:"thigh",thick:4.2,rain:true}],
+    ["Gilet",{f:2,w:3,sleeve:"none",hem:"hip",thick:3.4}]
+  ],
+  shoes: [
+    ["Oxford shoes",{f:5,w:2}],["Derby shoes",{f:5,w:2}],["Loafers",{f:4,w:2}],
+    ["Court heels",{f:5,w:1,heel:1}],["Block heels",{f:4,w:1,heel:1}],
+    ["Chelsea boots",{f:4,w:3,boot:1}],["Ankle boots",{f:3,w:3,boot:1}],
+    ["Chukka boots",{f:3,w:3,boot:1}],["Leather sneakers",{f:2,w:1}],
+    ["Trainers",{f:1,w:1}],["Canvas sneakers",{f:1,w:1}],["Sandals",{f:1,w:1,open:true}],
+    ["Wellington boots",{f:1,w:3,boot:2,rain:true}]
+  ],
+  headwear: [["Baseball cap",{f:1,w:1}],["Beanie",{f:1,w:4}],["Fedora",{f:4,w:2,brim:1}],["Sun hat",{f:2,w:1,brim:1.5}],["Flat cap",{f:3,w:2}]],
+  bag: [["Tote bag",{f:2,w:0}],["Shoulder bag",{f:3,w:0}],["Clutch",{f:5,w:0}],["Backpack",{f:1,w:0}],["Briefcase",{f:5,w:0}],["Weekender",{f:2,w:0}]],
+  accessory: [
+    ["Tie",{f:5,w:0,shape:"tie"}],["Bow tie",{f:5,w:0,shape:"bow"}],
+    ["Pocket square",{f:5,w:0,shape:"pocket"}],["Scarf",{f:2,w:3,shape:"scarf"}],
+    ["Belt",{f:3,w:0,shape:"belt"}],["Necklace",{f:4,w:0,shape:"neck"}],
+    ["Watch",{f:3,w:0,shape:"wrist"}],["Sunglasses",{f:2,w:0,shape:"glasses"}],
+    ["Gloves",{f:2,w:4,shape:"gloves"}]
+  ]
+};
+function subtypeInfo(cat, sub){
+  const row = (SUBTYPES[cat] || []).find(r => r[0] === sub);
+  return row ? row[1] : {f:3,w:2};
+}
+
+const OCCASIONS = [
+  { id:"wedding", label:"Wedding guest", target:4.4, note:"Formal but not upstaging.",
+    prefer:["Blazer","Suit jacket","Oxford shirt","Blouse","Cocktail dress","Day dress","Silk top","Wool trousers","Suit trousers","Oxford shoes","Derby shoes","Court heels","Block heels","Loafers","Tie","Pocket square","Clutch"],
+    avoid:["Hoodie","Track pants","Trainers","Shorts","Chino shorts","Sweatshirt","Baseball cap","Backpack","Wellington boots"],
+    banColours:["white","ivory","cream"], banReason:"White belongs to the couple.",
+    wantsJacket:true },
+  { id:"blacktie", label:"Black tie", target:5, note:"Evening dress, no compromises.",
+    prefer:["Suit jacket","Blazer","Oxford shirt","Evening gown","Cocktail dress","Suit trousers","Wool trousers","Oxford shoes","Court heels","Bow tie","Clutch","Pocket square"],
+    avoid:["Jeans","T-shirt","Hoodie","Trainers","Sneakers","Leather sneakers","Canvas sneakers","Shorts","Chino shorts","Denim jacket","Baseball cap","Backpack","Track pants"],
+    preferColours:["black","navy","charcoal","burgundy"], wantsJacket:true },
+  { id:"dinner", label:"Dinner party", target:3.6, note:"Smart, comfortable, someone's home.",
+    prefer:["Knit jumper","Oxford shirt","Linen shirt","Blouse","Silk top","Chinos","Wool trousers","Day dress","Loafers","Chelsea boots","Leather sneakers","Ankle boots"],
+    avoid:["Track pants","Wellington boots","Sweatshirt","Baseball cap","Backpack"] },
+  { id:"cocktail", label:"Cocktail party", target:4.2, note:"A bit of shine after dark.",
+    prefer:["Cocktail dress","Silk top","Blouse","Blazer","Wool trousers","Court heels","Block heels","Loafers","Oxford shoes","Necklace","Clutch"],
+    avoid:["Hoodie","Track pants","Trainers","Shorts","Wellington boots","Baseball cap","Backpack"] },
+  { id:"work", label:"Work / office", target:3.8, note:"Reliable, repeatable, unremarkable in the right way.",
+    prefer:["Oxford shirt","Blouse","Knit jumper","Chinos","Wool trousers","Pencil skirt","Blazer","Loafers","Derby shoes","Chelsea boots","Leather sneakers","Watch","Briefcase","Tote bag"],
+    avoid:["Track pants","Shorts","Chino shorts","Wellington boots","Sun hat"] },
+  { id:"interview", label:"Job interview", target:4.6, note:"One notch above the room.",
+    prefer:["Blazer","Suit jacket","Oxford shirt","Blouse","Suit trousers","Wool trousers","Pencil skirt","Oxford shoes","Derby shoes","Court heels","Loafers","Watch","Briefcase"],
+    avoid:["T-shirt","Hoodie","Jeans","Trainers","Canvas sneakers","Shorts","Track pants","Baseball cap","Sunglasses","Backpack","Sweatshirt"],
+    preferColours:["navy","charcoal","grey","black","white"], wantsJacket:true },
+  { id:"casual", label:"Casual weekend", target:1.8, note:"Nothing to prove.",
+    prefer:["T-shirt","Polo shirt","Sweatshirt","Hoodie","Jeans","Chinos","Chino shorts","Leather sneakers","Canvas sneakers","Trainers","Denim jacket","Chore jacket","Baseball cap","Backpack","Tote bag"],
+    avoid:["Evening gown","Bow tie","Court heels","Suit jacket","Pocket square"] },
+  { id:"date", label:"Date night", target:3.4, note:"Considered, not costumed.",
+    prefer:["Knit jumper","Oxford shirt","Silk top","Blouse","Jeans","Chinos","Wool trousers","Day dress","Cocktail dress","Chelsea boots","Ankle boots","Leather sneakers","Loafers","Leather jacket","Blazer"],
+    avoid:["Track pants","Wellington boots","Baseball cap","Backpack","Sweatshirt"] },
+  { id:"beach", label:"Beach / holiday", target:1.4, note:"Heat first, everything else second.",
+    prefer:["T-shirt","Linen shirt","Tank top","Sundress","Shorts","Chino shorts","Linen trousers","Sandals","Canvas sneakers","Sun hat","Sunglasses","Tote bag"],
+    avoid:["Overcoat","Suit jacket","Wool trousers","Oxford shoes","Court heels","Knit jumper","Puffer jacket","Parka","Beanie"],
+    banColours:["black"], banReason:"Black soaks up sun.", noJacket:true },
+  { id:"funeral", label:"Funeral", target:4.6, note:"Sober and quiet.",
+    prefer:["Suit jacket","Blazer","Overcoat","Oxford shirt","Wool trousers","Suit trousers","Pencil skirt","Oxford shoes","Derby shoes","Court heels","Tie"],
+    avoid:["Shorts","T-shirt","Trainers","Hoodie","Sunglasses","Baseball cap","Track pants","Sundress"],
+    preferColours:["black","charcoal","navy"], banColours:["red","orange","yellow","pink"],
+    banReason:"Bright colour reads as loud here.", wantsJacket:true },
+  { id:"active", label:"Gym / active", target:1, note:"Move in it.",
+    prefer:["T-shirt","Tank top","Sweatshirt","Hoodie","Track pants","Leggings","Shorts","Trainers","Gilet","Baseball cap","Backpack"],
+    avoid:["Oxford shirt","Blazer","Suit jacket","Wool trousers","Oxford shoes","Court heels","Loafers","Evening gown","Tie"] },
+  { id:"outdoors", label:"Outdoors / walk", target:1.6, note:"Weather is the brief.",
+    prefer:["T-shirt","Knit jumper","Sweatshirt","Jeans","Chinos","Chukka boots","Ankle boots","Chelsea boots","Trainers","Parka","Raincoat","Chore jacket","Gilet","Beanie","Backpack","Wellington boots"],
+    avoid:["Court heels","Evening gown","Oxford shoes","Cocktail dress","Silk top","Clutch"] }
+];
+
+/* ------------------------------ small utils ------------------------------ */
+const $ = s => document.querySelector(s);
+const $$ = s => Array.from(document.querySelectorAll(s));
+const uid = () => Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-4);
+const clamp = (v,a,b) => Math.max(a, Math.min(b, v));
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const DAY = 86400000;
+
+function toast(msg){
+  const t = $("#toast"); t.textContent = msg; t.classList.add("on");
+  clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.remove("on"), 2600);
+}
+
+/* colour ------------------------------------------------------------------ */
+function hexToRgb(h){ h = h.replace("#",""); if(h.length===3) h = h.split("").map(c=>c+c).join("");
+  const n = parseInt(h,16); return [n>>16 & 255, n>>8 & 255, n & 255]; }
+function rgbToHex(r,g,b){ return "#" + [r,g,b].map(v => clamp(Math.round(v),0,255).toString(16).padStart(2,"0")).join(""); }
+function rgbToHsl(r,g,b){
+  r/=255; g/=255; b/=255;
+  const mx = Math.max(r,g,b), mn = Math.min(r,g,b), l = (mx+mn)/2;
+  let h = 0, s = 0;
+  if(mx !== mn){
+    const d = mx - mn;
+    s = l > .5 ? d/(2-mx-mn) : d/(mx+mn);
+    if(mx===r) h = ((g-b)/d + (g<b?6:0));
+    else if(mx===g) h = (b-r)/d + 2;
+    else h = (r-g)/d + 4;
+    h *= 60;
+  }
+  return [h, s, l];
+}
+const hexToHsl = h => rgbToHsl(...hexToRgb(h));
+
+/* A small, opinionated colour vocabulary — the words a wardrobe actually uses. */
+function colourName(hex){
+  const [h,s,l] = hexToHsl(hex);
+  if(l < .10) return "black";
+  if(l > .93 && s < .10) return "white";
+  if(s < .09){
+    if(l > .80) return "ivory";
+    if(l > .60) return "light grey";
+    if(l > .34) return "grey";
+    return "charcoal";
+  }
+  if(l > .86 && s < .30) return h < 60 ? "cream" : "ivory";
+  if(h < 15 || h >= 345) return l < .28 ? "burgundy" : (s < .45 ? "brick" : "red");
+  if(h < 32) return l < .30 ? "chocolate" : (s < .40 ? "taupe" : (l > .70 ? "peach" : "rust"));
+  if(h < 45) return l < .34 ? "brown" : (l > .72 ? "sand" : (s > .55 ? "amber" : "camel"));
+  if(h < 62) return l < .38 ? "olive" : (s > .60 ? "mustard" : "khaki");
+  if(h < 88) return l < .34 ? "olive" : "lime";
+  if(h < 155) return l < .30 ? "forest" : (s < .35 ? "sage" : "green");
+  if(h < 190) return l < .32 ? "teal" : "aqua";
+  if(h < 215) return l < .30 ? "navy" : (l > .72 ? "sky" : "blue");
+  if(h < 250) return l < .34 ? "navy" : (s < .35 ? "slate" : "cobalt");
+  if(h < 285) return l < .34 ? "aubergine" : (l > .72 ? "lavender" : "purple");
+  if(h < 320) return l < .32 ? "plum" : (s < .45 ? "mauve" : "magenta");
+  return l > .74 ? "blush" : (l < .32 ? "burgundy" : "pink");
+}
+const NEUTRALS = new Set(["black","white","ivory","cream","light grey","grey","charcoal","navy","camel","sand","taupe","brown","chocolate","khaki","slate","stone"]);
+
+function averageColour(img, box){
+  const c = document.createElement("canvas"), n = 40;
+  c.width = n; c.height = n;
+  const ctx = c.getContext("2d", { willReadFrequently:true });
+  const sx = box ? box[0]*img.width : 0, sy = box ? box[1]*img.height : 0;
+  const sw = box ? box[2]*img.width : img.width, sh = box ? box[3]*img.height : img.height;
+  ctx.drawImage(img, sx, sy, sw, sh, 0, 0, n, n);
+  const d = ctx.getImageData(0,0,n,n).data;
+  /* Weight toward mid-tone, saturated pixels: backgrounds are usually pale and flat. */
+  let r=0,g=0,b=0,wt=0;
+  for(let i=0;i<d.length;i+=4){
+    const [hh,ss,ll] = rgbToHsl(d[i],d[i+1],d[i+2]);
+    const w = (ll>.96||ll<.04) ? .05 : (0.35 + ss*1.6 + (1-Math.abs(ll-.5)*2)*.5);
+    r += d[i]*w; g += d[i+1]*w; b += d[i+2]*w; wt += w;
+  }
+  return rgbToHex(r/wt, g/wt, b/wt);
+}
+
+/* image handling ---------------------------------------------------------- */
+function loadImage(src){
+  return new Promise((res, rej) => {
+    const im = new Image();
+    im.crossOrigin = "anonymous";
+    im.onload = () => res(im);
+    im.onerror = () => rej(new Error("image"));
+    im.src = src;
+  });
+}
+async function fileToJpeg(file, max = 1100, quality = .86){
+  const url = URL.createObjectURL(file);
+  try{
+    const im = await loadImage(url);
+    const sc = Math.min(1, max / Math.max(im.width, im.height));
+    const c = document.createElement("canvas");
+    c.width = Math.round(im.width * sc); c.height = Math.round(im.height * sc);
+    c.getContext("2d").drawImage(im, 0, 0, c.width, c.height);
+    return await new Promise(r => c.toBlob(r, "image/jpeg", quality));
+  } finally { URL.revokeObjectURL(url); }
+}
+function canvasToBlob(c, q = .88){ return new Promise(r => c.toBlob(r, "image/jpeg", q)); }
+</script>
+
+<script>
+/* ----------------------------- 2. STORAGE -------------------------------- */
+/* Two backends behind one door: the artifact's own store when the viewer can
+   write to it, otherwise this browser. Photos go to assets/IndexedDB; the
+   garment records that point at them go to db/IndexedDB. */
+
+const Store = (() => {
+  let mode = "pending", db = null, assets = null, idb = null;
+  const urlCache = new Map();
+
+  function openIDB(){
+    return new Promise((res, rej) => {
+      const rq = indexedDB.open("fitting-room", 1);
+      rq.onupgradeneeded = () => {
+        const d = rq.result;
+        if(!d.objectStoreNames.contains("images")) d.createObjectStore("images", { keyPath:"id" });
+        if(!d.objectStoreNames.contains("items")) d.createObjectStore("items", { keyPath:"id" });
+        if(!d.objectStoreNames.contains("meta")) d.createObjectStore("meta", { keyPath:"id" });
+      };
+      rq.onsuccess = () => res(rq.result);
+      rq.onerror = () => rej(rq.error);
+    });
+  }
+  const tx = (store, m, fn) => new Promise((res, rej) => {
+    const t = idb.transaction(store, m), s = t.objectStore(store), r = fn(s);
+    t.oncomplete = () => res(r && r.result);
+    t.onerror = () => rej(t.error);
+  });
+
+  async function init(){
+    if(window.claude && typeof window.claude.use === "function"){
+      try{ db = await window.claude.use("db"); }catch(e){ db = null; }
+      try{ assets = await window.claude.use("assets"); }catch(e){ assets = null; }
+    }
+    if(db && assets){ mode = "cloud"; return mode; }
+    db = null; assets = null;
+    try{ idb = await openIDB(); mode = "local"; }
+    catch(e){ mode = "none"; }
+    return mode;
+  }
+
+  async function putImage(blob){
+    if(mode === "cloud"){
+      const r = await assets.upload(blob, { type:"image/jpeg" });
+      urlCache.set("asset:" + r.id, r.url);
+      return "asset:" + r.id;
+    }
+    const id = uid();
+    if(mode === "local") await tx("images","readwrite", s => s.put({ id, blob }));
+    urlCache.set("local:" + id, URL.createObjectURL(blob));
+    return "local:" + id;
+  }
+  async function imageURL(ref){
+    if(!ref) return null;
+    if(urlCache.has(ref)) return urlCache.get(ref);
+    if(ref.startsWith("asset:")){ const u = "/_blob/" + ref.slice(6); urlCache.set(ref, u); return u; }
+    if(ref.startsWith("data:")) return ref;
+    if(mode !== "local") return null;
+    const rec = await tx("images","readonly", s => s.get(ref.slice(6)));
+    if(!rec) return null;
+    const u = URL.createObjectURL(rec.blob); urlCache.set(ref, u); return u;
+  }
+  async function dropImage(ref){
+    if(!ref) return;
+    urlCache.delete(ref);
+    try{
+      if(ref.startsWith("asset:") && assets) await assets.delete(ref.slice(6));
+      else if(ref.startsWith("local:") && mode === "local") await tx("images","readwrite", s => s.delete(ref.slice(6)));
+    }catch(e){ /* an orphaned blob is harmless */ }
+  }
+
+  async function allItems(){
+    if(mode === "cloud"){ const snap = await db.collection("wardrobe").get(); return snap.docs.map(d => d.data()); }
+    if(mode === "local") return (await tx("items","readonly", s => s.getAll())) || [];
+    return [];
+  }
+  async function saveItem(it){
+    if(mode === "cloud") await db.collection("wardrobe").doc(it.id).set(it);
+    else if(mode === "local") await tx("items","readwrite", s => s.put(it));
+  }
+  async function removeItem(id){
+    if(mode === "cloud") await db.collection("wardrobe").doc(id).delete();
+    else if(mode === "local") await tx("items","readwrite", s => s.delete(id));
+  }
+  async function getProfile(){
+    if(mode === "cloud"){ const d = await db.doc("profile/main").get(); return d.exists ? d.data() : null; }
+    if(mode === "local"){ const r = await tx("meta","readonly", s => s.get("profile")); return r ? r.value : null; }
+    return null;
+  }
+  async function saveProfile(p){
+    if(mode === "cloud") await db.doc("profile/main").set(p);
+    else if(mode === "local") await tx("meta","readwrite", s => s.put({ id:"profile", value:p }));
+  }
+
+  return { init, putImage, imageURL, dropImage, allItems, saveItem, removeItem,
+           getProfile, saveProfile, get mode(){ return mode; } };
+})();
+
+/* ------------------------------- 3. STATE -------------------------------- */
+const ANGLES = [
+  { id:"front", label:"Front",       deg:"0°",   hint:"Face the lens straight on, shoulders square." },
+  { id:"right", label:"Right side",  deg:"90°",  hint:"Turn a quarter to your left so the lens sees your right cheek." },
+  { id:"back",  label:"Back",        deg:"180°", hint:"Back of the head. Ask someone, or use a timer." },
+  { id:"left",  label:"Left side",   deg:"270°", hint:"Turn a quarter to your right so the lens sees your left cheek." }
+];
+
+const DEFAULT_PROFILE = {
+  heightCm: 175, shoulderCm: 44, waistCm: 84, hipCm: 98,
+  skin: "#C6A182", faceZoom: 1, faceY: 0, selfies: {},
+  useScan: false, scanPhotoSkin: true, scan: null
+};
+
+const State = {
+  ready: false,
+  usingSamples: false,
+  items: [],
+  profile: { ...DEFAULT_PROFILE },
+  outfit: {},              /* slot -> item id (accessory holds an array) */
+  view: "mirror",
+  filter: "all",
+  query: "",
+  brief: { occasion:"dinner", tempC:19, cond:[], time:"day" },
+  looks: []
+};
+const itemById = id => State.items.find(i => i.id === id);
+function wornIds(){
+  const out = [];
+  for(const k in State.outfit){
+    const v = State.outfit[k];
+    if(Array.isArray(v)) out.push(...v); else if(v) out.push(v);
+  }
+  return out;
+}
+function isWorn(id){ return wornIds().includes(id); }
+
+/* --------------------- sample wardrobe (memory only) ---------------------- */
+/* Fifteen example garments drawn as fabric swatches, so the mirror has
+   something on it the first time the page opens. Never written to storage. */
+function weaveSwatch(hex, cat, pattern, withIcon){
+  const c = document.createElement("canvas"); c.width = c.height = 320;
+  const g = c.getContext("2d");
+  const [h,s,l] = hexToHsl(hex);
+  const shade = (dl,ds) => { const [r,gg,b] = hslToRgb(h, clamp(s+(ds||0),0,1), clamp(l+dl,0,1)); return rgbToHex(r,gg,b); };
+  g.fillStyle = hex; g.fillRect(0,0,320,320);
+  if(pattern === "denim" || pattern === "weave"){
+    g.globalAlpha = .16;
+    for(let i=-320;i<320;i+=3){ g.strokeStyle = i%6 ? shade(-.14) : shade(.12); g.lineWidth = 1.4;
+      g.beginPath(); g.moveTo(i,0); g.lineTo(i+320,320); g.stroke(); }
+    g.globalAlpha = 1;
+  } else if(pattern === "twill"){
+    g.globalAlpha = .12;
+    for(let i=-320;i<640;i+=7){ g.strokeStyle = shade(-.16); g.lineWidth = 2.6;
+      g.beginPath(); g.moveTo(i,0); g.lineTo(i-320,320); g.stroke(); }
+    g.globalAlpha = 1;
+  } else if(pattern === "grain"){
+    g.globalAlpha = .10;
+    for(let i=0;i<2400;i++){ g.fillStyle = Math.random()>.5 ? shade(.16) : shade(-.16);
+      g.fillRect(Math.random()*320, Math.random()*320, 2.4, 1.4); }
+    g.globalAlpha = 1;
+  } else {
+    g.globalAlpha = .07;
+    for(let i=0;i<320;i+=2){ g.fillStyle = i%4 ? shade(-.1) : shade(.08); g.fillRect(0,i,320,1); }
+    g.globalAlpha = 1;
+  }
+  if(!withIcon) return c.toDataURL("image/jpeg", .86);
+  /* faint flat-lay silhouette so the grid reads as garments, not paint chips */
+  g.save(); g.translate(160,160); g.scale(1.18,1.18);
+  g.strokeStyle = l > .55 ? "rgba(20,22,30,.30)" : "rgba(255,255,255,.34)";
+  g.lineWidth = 3.4; g.lineJoin = "round"; g.lineCap = "round";
+  const P = new Path2D(SILHOUETTE[cat] || SILHOUETTE.top);
+  g.stroke(P); g.restore();
+  return c.toDataURL("image/jpeg", .88);
+}
+function hslToRgb(h,s,l){
+  h = ((h%360)+360)%360/360;
+  if(s===0){ const v = l*255; return [v,v,v]; }
+  const q = l < .5 ? l*(1+s) : l+s-l*s, p = 2*l-q;
+  const f = t => { t = (t+1)%1;
+    if(t < 1/6) return p + (q-p)*6*t;
+    if(t < 1/2) return q;
+    if(t < 2/3) return p + (q-p)*(2/3-t)*6;
+    return p; };
+  return [f(h+1/3)*255, f(h)*255, f(h-1/3)*255];
+}
+const SILHOUETTE = {
+  top:"M-34-52 -62-38 -52-14 -34-22 -34 54 34 54 34-22 52-14 62-38 34-52a14 14 0 0 1-68 0Z",
+  bottom:"M-30-56 30-56 36 8 30 58 6 58 0 6 -6 58 -30 58 -36 8Z",
+  dress:"M-26-54 -48-40 -38-18 -24-26 -44 54 44 54 24-26 38-18 48-40 26-54a12 12 0 0 1-52 0Z",
+  outerwear:"M-32-52 -62-36 -52-10 -34-20 -34 56 34 56 34-20 52-10 62-36 32-52 0-40Z M0-40 0 56",
+  shoes:"M-52 26 -52-6c0-10 10-16 20-12L6 4c14 6 40 6 46 14 4 6 2 10-6 10Z",
+  headwear:"M-46 22c0-6 8-10 18-12-6-8-8-18-8-26 0-20 16-32 36-32s36 12 36 32c0 8-2 18-8 26 10 2 18 6 18 12 0 6-40 10-46 10s-46-4-46-10Z",
+  bag:"M-34-14 34-14 44 46 -44 46Z M-18-14c0-18 6-30 18-30s18 12 18 30",
+  accessory:"M-8-46 8-46 14-30 0-16 -14-30Z M0-16 10 30 0 50 -10 30Z"
+};
+function sampleItem(name, cat, sub, hex, pattern, extra){
+  const info = subtypeInfo(cat, sub);
+  return Object.assign({
+    id:"s_" + name.toLowerCase().replace(/\W+/g,"_"), name, cat, sub,
+    colour:hex, colourName:colourName(hex), fabric:"", brand:"",
+    formality:info.f, warmth:info.w,
+    photo:weaveSwatch(hex, cat, pattern, true), swatch:weaveSwatch(hex, cat, pattern, false),
+    notes:"", timesWorn:0, lastWorn:0, added:0, sample:true
+  }, extra || {});
+}
+function buildSamples(){
+  return [
+    sampleItem("White oxford shirt","top","Oxford shirt","#F2F1EC","weave",{fabric:"cotton"}),
+    sampleItem("Grey marl tee","top","T-shirt","#9A9DA4","grain",{fabric:"cotton"}),
+    sampleItem("Navy merino crew","top","Knit jumper","#25324D","weave",{fabric:"merino wool"}),
+    sampleItem("Cream linen shirt","top","Linen shirt","#E6DDC8","weave",{fabric:"linen"}),
+    sampleItem("Black knit polo","top","Polo shirt","#1B1B1F","weave",{fabric:"cotton knit"}),
+    sampleItem("Charcoal wool trousers","bottom","Wool trousers","#3A3D45","twill",{fabric:"wool"}),
+    sampleItem("Indigo jeans","bottom","Jeans","#2E4468","denim",{fabric:"denim"}),
+    sampleItem("Stone chino shorts","bottom","Chino shorts","#C4B295","twill",{fabric:"cotton"}),
+    sampleItem("Olive chinos","bottom","Chinos","#5C5C3C","twill",{fabric:"cotton"}),
+    sampleItem("Navy blazer","outerwear","Blazer","#22304C","twill",{fabric:"wool"}),
+    sampleItem("Olive chore jacket","outerwear","Chore jacket","#4E5340","twill",{fabric:"cotton canvas"}),
+    sampleItem("Charcoal overcoat","outerwear","Overcoat","#33363E","grain",{fabric:"wool"}),
+    sampleItem("Black derby shoes","shoes","Derby shoes","#17161A","grain",{fabric:"leather"}),
+    sampleItem("White leather sneakers","shoes","Leather sneakers","#EDECE8","grain",{fabric:"leather"}),
+    sampleItem("Tan chukka boots","shoes","Chukka boots","#9A6B42","grain",{fabric:"suede"}),
+    sampleItem("Burgundy silk tie","accessory","Tie","#6B1F2E","weave",{fabric:"silk"})
+  ];
+}
+</script>
+
+<script>
+/* ======================= BODY SCAN (shape from silhouette) ===============
+   Five photographs: the empty room once, then you turning a quarter at a
+   time. Each frame is matted against the empty plate, normalised to a
+   common height, and used to carve a voxel volume. What survives all four
+   silhouettes is your visual hull — real width, real depth, real limbs.
+   A blur turns the voxels into a smooth field; surface nets pull a mesh
+   out of it; the four photographs are projected back on as vertex colour.
+   ======================================================================== */
+
+const Scan = (() => {
+  const MW = 128, MH = 320;             /* normalised silhouette, 1 col = 1 row in scale */
+  const NX = 80, NY = 200, NZ = 80;     /* voxel grid */
+  const NXY = NX * NY;
+
+  /* ---------- pixel work ---------- */
+  function workCanvas(img, maxDim){
+    const s = Math.min(1, maxDim / Math.max(img.width, img.height));
+    const c = document.createElement("canvas");
+    c.width = Math.max(2, Math.round(img.width * s));
+    c.height = Math.max(2, Math.round(img.height * s));
+    c.getContext("2d", { willReadFrequently:true }).drawImage(img, 0, 0, c.width, c.height);
+    return c;
+  }
+  function pixels(c){ return c.getContext("2d", { willReadFrequently:true }).getImageData(0,0,c.width,c.height); }
+
+  /* difference matte against the empty-room plate */
+  function matteAgainstPlate(a, b, sens){
+    const n = a.width * a.height, m = new Uint8Array(n);
+    const thr = 62 - sens * 44;
+    for(let p = 0, q = 0; p < n; p++, q += 4){
+      const dr = a.data[q] - b.data[q], dg = a.data[q+1] - b.data[q+1], db = a.data[q+2] - b.data[q+2];
+      const d = Math.max(Math.abs(dr), Math.abs(dg), Math.abs(db)) * 0.62
+              + Math.abs(0.299*dr + 0.587*dg + 0.114*db) * 0.38;
+      m[p] = d > thr ? 1 : 0;
+    }
+    return m;
+  }
+  /* no plate: flood the border colour away and keep what is left */
+  function matteFromBorder(a, sens){
+    const w = a.width, h = a.height, n = w*h, m = new Uint8Array(n).fill(1);
+    const tol = 26 + sens * 54;
+    let r = 0, g = 0, b = 0, c = 0;
+    const sample = (x,y) => { const q = (y*w+x)*4; r += a.data[q]; g += a.data[q+1]; b += a.data[q+2]; c++; };
+    for(let x = 0; x < w; x += 2){ sample(x,0); sample(x,h-1); }
+    for(let y = 0; y < h; y += 2){ sample(0,y); sample(w-1,y); }
+    r /= c; g /= c; b /= c;
+    const stack = [];
+    const seen = new Uint8Array(n);
+    for(let x = 0; x < w; x++){ stack.push(x, 0, x, h-1); }
+    for(let y = 0; y < h; y++){ stack.push(0, y, w-1, y); }
+    while(stack.length){
+      const y = stack.pop(), x = stack.pop();
+      if(x < 0 || y < 0 || x >= w || y >= h) continue;
+      const p = y*w + x;
+      if(seen[p]) continue;
+      seen[p] = 1;
+      const q = p*4;
+      const d = Math.abs(a.data[q]-r) + Math.abs(a.data[q+1]-g) + Math.abs(a.data[q+2]-b);
+      if(d > tol*3) continue;
+      m[p] = 0;
+      stack.push(x+1,y, x-1,y, x,y+1, x,y-1);
+    }
+    return m;
+  }
+
+  function erodeDilate(m, w, h, er, di){
+    const pass = (src, keep) => {
+      const out = new Uint8Array(src.length);
+      for(let y = 1; y < h-1; y++) for(let x = 1; x < w-1; x++){
+        const p = y*w + x;
+        const s = src[p-1] + src[p+1] + src[p-w] + src[p+w] + src[p];
+        out[p] = keep ? (s >= 5 ? 1 : 0) : (s >= 1 ? 1 : 0);
+      }
+      return out;
+    };
+    let cur = m;
+    for(let i = 0; i < er; i++) cur = pass(cur, true);
+    for(let i = 0; i < di; i++) cur = pass(cur, false);
+    return cur;
+  }
+  /* keep only the biggest blob, then close any holes inside it */
+  function largestBlob(m, w, h){
+    const lab = new Int32Array(m.length).fill(0);
+    let best = 0, bestId = 0, id = 0;
+    const stack = new Int32Array(m.length);
+    let sp = 0;
+    for(let s = 0; s < m.length; s++){
+      if(!m[s] || lab[s]) continue;
+      id++; let count = 0;
+      sp = 0; stack[sp++] = s;
+      lab[s] = id;
+      while(sp){
+        const p = stack[--sp]; count++;
+        const x = p % w, y = (p - x) / w;
+        if(x > 0   && m[p-1] && !lab[p-1]){ lab[p-1] = id; stack[sp++] = p-1; }
+        if(x < w-1 && m[p+1] && !lab[p+1]){ lab[p+1] = id; stack[sp++] = p+1; }
+        if(y > 0   && m[p-w] && !lab[p-w]){ lab[p-w] = id; stack[sp++] = p-w; }
+        if(y < h-1 && m[p+w] && !lab[p+w]){ lab[p+w] = id; stack[sp++] = p+w; }
+      }
+      if(count > best){ best = count; bestId = id; }
+    }
+    const out = new Uint8Array(m.length);
+    for(let p = 0; p < m.length; p++) out[p] = lab[p] === bestId ? 1 : 0;
+    /* flood the true outside, everything else enclosed becomes body */
+    /* Mark at push time, never at pop time: a pixel then enters the stack at
+       most once, so the stack cannot outgrow the image and drop work. Losing
+       pushes here silently fills the gap between the legs and between arm and
+       body, and the scan comes out as a slab. */
+    const outside = new Uint8Array(m.length);
+    const st = new Int32Array(m.length);
+    let tp = 0;
+    const push = p => { if(!outside[p] && !out[p]){ outside[p] = 1; st[tp++] = p; } };
+    for(let x = 0; x < w; x++){ push(x); push(x + (h-1)*w); }
+    for(let y = 0; y < h; y++){ push(y*w); push(y*w + w-1); }
+    while(tp){
+      const p = st[--tp];
+      const x = p % w, y = (p - x) / w;
+      if(x > 0) push(p-1);
+      if(x < w-1) push(p+1);
+      if(y > 0) push(p-w);
+      if(y < h-1) push(p+w);
+    }
+    for(let p = 0; p < out.length; p++) if(!outside[p]) out[p] = 1;
+    return { mask: out, area: best };
+  }
+
+  /* normalise one frame into the shared body space */
+  function normalise(mask, img, w, h){
+    let x0 = w, x1 = -1, y0 = h, y1 = -1;
+    for(let y = 0; y < h; y++) for(let x = 0; x < w; x++){
+      if(!mask[y*w+x]) continue;
+      if(x < x0) x0 = x; if(x > x1) x1 = x;
+      if(y < y0) y0 = y; if(y > y1) y1 = y;
+    }
+    if(x1 < 0 || (y1 - y0) < h * 0.35) return null;
+    const bh = y1 - y0 + 1;
+    /* the turning axis: the middle of the hips, not of the whole outline */
+    let ax = 0, an = 0;
+    for(let y = Math.round(y0 + bh*0.50); y <= Math.round(y0 + bh*0.66); y++){
+      let lo = -1, hi = -1;
+      for(let x = 0; x < w; x++) if(mask[y*w+x]){ if(lo < 0) lo = x; hi = x; }
+      if(lo >= 0){ ax += (lo + hi)/2; an++; }
+    }
+    const axis = an ? ax/an : (x0 + x1)/2;
+    const sc = bh / MH;
+    const out = new Uint8Array(MW*MH);
+    const tex = new Uint8ClampedArray(MW*MH*4);
+    const src = img.data;
+    for(let v = 0; v < MH; v++){
+      const sy = Math.round(y0 + v*sc);
+      for(let u = 0; u < MW; u++){
+        const sx = Math.round(axis + (u - MW/2)*sc);
+        const d = v*MW + u;
+        if(sx < 0 || sy < 0 || sx >= w || sy >= h) continue;
+        const p = sy*w + sx;
+        out[d] = mask[p];
+        const q = p*4, t = d*4;
+        tex[t] = src[q]; tex[t+1] = src[q+1]; tex[t+2] = src[q+2]; tex[t+3] = 255;
+      }
+    }
+    return { mask: out, tex, bboxH: bh, pixelHeight: bh };
+  }
+
+  async function frameFor(photoRef, plateImg, sens){
+    const url = await Store.imageURL(photoRef);
+    if(!url) return null;
+    const img = await loadImage(url);
+    const c = workCanvas(img, 340);
+    const px = pixels(c);
+    let m;
+    if(plateImg){
+      const pc = document.createElement("canvas");
+      pc.width = c.width; pc.height = c.height;
+      pc.getContext("2d").drawImage(plateImg, 0, 0, c.width, c.height);
+      m = matteAgainstPlate(px, pixels(pc), sens);
+    } else {
+      m = matteFromBorder(px, sens);
+    }
+    m = erodeDilate(m, c.width, c.height, 1, 1);
+    const blob = largestBlob(m, c.width, c.height);
+    if(blob.area < c.width*c.height*0.02) return null;
+    return normalise(blob.mask, px, c.width, c.height);
+  }
+
+  /* a small PNG of the cutout, for the capture screen */
+  function previewURL(frame){
+    const c = document.createElement("canvas");
+    c.width = MW; c.height = MH;
+    const g = c.getContext("2d");
+    const im = g.createImageData(MW, MH);
+    for(let p = 0; p < MW*MH; p++){
+      const t = p*4;
+      if(frame.mask[p]){
+        im.data[t] = frame.tex[t]; im.data[t+1] = frame.tex[t+1];
+        im.data[t+2] = frame.tex[t+2]; im.data[t+3] = 255;
+      } else { im.data[t+3] = 0; }
+    }
+    g.putImageData(im, 0, 0);
+    return c.toDataURL("image/png");
+  }
+
+  /* ---------- carve ---------- */
+  const at = (f, u, v) => (u < 0 || v < 0 || u >= MW || v >= MH) ? 0 : f.mask[v*MW + u];
+  function carve(frames){
+    const vol = new Uint8Array(NX*NY*NZ);
+    const F = frames.front, R = frames.right, B = frames.back, L = frames.left;
+    for(let j = 0; j < NY; j++){
+      const v = Math.round((1 - j/(NY-1)) * (MH-1));
+      for(let k = 0; k < NZ; k++){
+        const uz = Math.round(k/(NZ-1) * (MW-1));
+        const rOK = at(R, uz, v), lOK = at(L, MW-1-uz, v);
+        if(!rOK || !lOK) continue;
+        for(let i = 0; i < NX; i++){
+          const ux = Math.round(i/(NX-1) * (MW-1));
+          if(at(F, ux, v) && at(B, MW-1-ux, v)) vol[i + j*NX + k*NXY] = 1;
+        }
+      }
+    }
+    return vol;
+  }
+  /* separable box blur turns the staircase into something a body-shaped */
+  function blur(vol){
+    const a = new Float32Array(vol.length);
+    for(let p = 0; p < vol.length; p++) a[p] = vol[p];
+    const b = new Float32Array(vol.length);
+    /* x */
+    for(let k = 0; k < NZ; k++) for(let j = 0; j < NY; j++){
+      const o = j*NX + k*NXY;
+      for(let i = 0; i < NX; i++){
+        const l = a[o + Math.max(0,i-1)], c = a[o+i], r = a[o + Math.min(NX-1,i+1)];
+        b[o+i] = (l + 2*c + r) * 0.25;
+      }
+    }
+    /* y */
+    for(let k = 0; k < NZ; k++) for(let i = 0; i < NX; i++){
+      const o = i + k*NXY;
+      for(let j = 0; j < NY; j++){
+        const l = b[o + Math.max(0,j-1)*NX], c = b[o + j*NX], r = b[o + Math.min(NY-1,j+1)*NX];
+        a[o + j*NX] = (l + 2*c + r) * 0.25;
+      }
+    }
+    /* z */
+    for(let j = 0; j < NY; j++) for(let i = 0; i < NX; i++){
+      const o = i + j*NX;
+      for(let k = 0; k < NZ; k++){
+        const l = a[o + Math.max(0,k-1)*NXY], c = a[o + k*NXY], r = a[o + Math.min(NZ-1,k+1)*NXY];
+        b[o + k*NXY] = (l + 2*c + r) * 0.25;
+      }
+    }
+    return b;
+  }
+
+  /* ---------- surface nets ---------- */
+  const CORNER = [[0,0,0],[1,0,0],[0,1,0],[1,1,0],[0,0,1],[1,0,1],[0,1,1],[1,1,1]];
+  const EDGE = [[0,1],[2,3],[4,5],[6,7],[0,2],[1,3],[4,6],[5,7],[0,4],[1,5],[2,6],[3,7]];
+  function surfaceNets(field, iso){
+    const cx = NX-1, cy = NY-1, cz = NZ-1;
+    const cell = new Int32Array(cx*cy*cz).fill(-1);
+    const pos = [], idx = [];
+    const val = new Float32Array(8);
+    for(let k = 0; k < cz; k++) for(let j = 0; j < cy; j++) for(let i = 0; i < cx; i++){
+      let bits = 0;
+      for(let c = 0; c < 8; c++){
+        const C = CORNER[c];
+        const v = field[(i+C[0]) + (j+C[1])*NX + (k+C[2])*NXY];
+        val[c] = v;
+        if(v > iso) bits |= 1 << c;
+      }
+      if(bits === 0 || bits === 255) continue;
+      let sx = 0, sy = 0, sz = 0, n = 0;
+      for(let e = 0; e < 12; e++){
+        const a = EDGE[e][0], b = EDGE[e][1];
+        const ia = (bits >> a) & 1, ib = (bits >> b) & 1;
+        if(ia === ib) continue;
+        const t = (iso - val[a]) / (val[b] - val[a] || 1e-6);
+        sx += CORNER[a][0] + (CORNER[b][0] - CORNER[a][0]) * t;
+        sy += CORNER[a][1] + (CORNER[b][1] - CORNER[a][1]) * t;
+        sz += CORNER[a][2] + (CORNER[b][2] - CORNER[a][2]) * t;
+        n++;
+      }
+      const vi = pos.length / 3;
+      pos.push(i + sx/n, j + sy/n, k + sz/n);
+      cell[i + j*cx + k*cx*cy] = vi;
+      const ci = i + j*cx + k*cx*cy;
+      const in0 = bits & 1;
+      /* quad across the x edge (corners 0,1) */
+      if(((bits >> 1) & 1) !== in0 && j > 0 && k > 0){
+        const q = [ci, ci - cx, ci - cx - cx*cy, ci - cx*cy];
+        emit(q, in0, cell, idx);
+      }
+      if(((bits >> 2) & 1) !== in0 && i > 0 && k > 0){
+        const q = [ci, ci - cx*cy, ci - cx*cy - 1, ci - 1];
+        emit(q, in0, cell, idx);
+      }
+      if(((bits >> 4) & 1) !== in0 && i > 0 && j > 0){
+        const q = [ci, ci - 1, ci - 1 - cx, ci - cx];
+        emit(q, in0, cell, idx);
+      }
+    }
+    return { pos: new Float32Array(pos), idx: new Uint32Array(idx) };
+  }
+  /* Laplacian relaxation: pulls each vertex toward its neighbours, which
+     takes the voxel staircase off the surface without losing the shape */
+  function relax(pos, idx, iters, amount){
+    const n = pos.length / 3;
+    const acc = new Float32Array(pos.length);
+    const cnt = new Uint32Array(n);
+    const add = (u, v) => { acc[u*3] += pos[v*3]; acc[u*3+1] += pos[v*3+1]; acc[u*3+2] += pos[v*3+2]; cnt[u]++; };
+    for(let it = 0; it < iters; it++){
+      acc.fill(0); cnt.fill(0);
+      for(let f = 0; f < idx.length; f += 3){
+        const a = idx[f], b = idx[f+1], c = idx[f+2];
+        add(a,b); add(a,c); add(b,a); add(b,c); add(c,a); add(c,b);
+      }
+      for(let v = 0; v < n; v++){
+        if(!cnt[v]) continue;
+        for(let k = 0; k < 3; k++){
+          const t = acc[v*3+k] / cnt[v];
+          pos[v*3+k] += (t - pos[v*3+k]) * amount;
+        }
+      }
+    }
+  }
+  function emit(q, flip, cell, idx){
+    const a = cell[q[0]], b = cell[q[1]], c = cell[q[2]], d = cell[q[3]];
+    if(a < 0 || b < 0 || c < 0 || d < 0) return;
+    if(flip) idx.push(a,b,c, a,c,d);
+    else idx.push(a,c,b, a,d,c);
+  }
+
+  /* ---------- landmarks and measurements ---------- */
+  function analyse(vol, heightCm){
+    const H = heightCm / 100;
+    const cellY = H / (NY - 1);
+    const spanX = (MW / MH) * H;
+    const cellX = spanX / (NX - 1);
+    const width = new Float32Array(NY), depth = new Float32Array(NY),
+          area = new Float32Array(NY), torso = new Float32Array(NY),
+          parts = new Uint8Array(NY), runsAt = [];
+    let ground = -1, top = -1;
+    for(let j = 0; j < NY; j++){
+      let x0 = NX, x1 = -1, z0 = NZ, z1 = -1, a = 0;
+      const col = new Uint8Array(NX);
+      const rowRuns = [];
+      for(let k = 0; k < NZ; k++) for(let i = 0; i < NX; i++){
+        if(!vol[i + j*NX + k*NXY]) continue;
+        a++; col[i] = 1;
+        if(i < x0) x0 = i; if(i > x1) x1 = i;
+        if(k < z0) z0 = k; if(k > z1) z1 = k;
+      }
+      if(!a) continue;
+      if(ground < 0) ground = j;
+      top = j;
+      width[j] = (x1 - x0 + 1) * cellX;
+      depth[j] = (z1 - z0 + 1) * cellX;
+      area[j] = a * cellX * cellX;
+      /* run lengths across x tell arms from torso */
+      let runs = 0, bestLen = 0, lo = -1;
+      for(let i = 0; i <= NX; i++){
+        const on = i < NX && col[i];
+        if(on && lo < 0) lo = i;
+        if(!on && lo >= 0){
+          runs++;
+          rowRuns.push([lo, i-1]);
+          if(i - lo > bestLen) bestLen = i - lo;
+          lo = -1;
+        }
+      }
+      parts[j] = runs;
+      torso[j] = bestLen * cellX / 2;
+      runsAt[j] = rowRuns;
+    }
+    const frac = f => clamp(Math.round(ground + (top - ground) * f), 0, NY-1);
+    /* the trunk only: arms hang beside the waist and would swamp a plain width */
+    const minT = (a, b) => { let bi = clamp(a,0,NY-1), bv = Infinity;
+      for(let j = clamp(a,0,NY-1); j <= clamp(b,0,NY-1); j++) if(torso[j] && torso[j] < bv){ bv = torso[j]; bi = j; }
+      return bi; };
+    const maxT = (a, b) => { let bi = clamp(a,0,NY-1), bv = -1;
+      for(let j = clamp(a,0,NY-1); j <= clamp(b,0,NY-1); j++) if(torso[j] > bv){ bv = torso[j]; bi = j; }
+      return bi; };
+    /* the crotch is the highest row where nothing crosses the turning axis
+       any more — two legs straddling a gap. Arms never do that, so they
+       cannot be mistaken for it. */
+    const midCol = (NX - 1) / 2;
+    const straddles = j => (runsAt[j] || []).some(r => r[0] <= midCol && r[1] >= midCol);
+    let crotch = frac(0.48);
+    for(let j = frac(0.58); j > frac(0.28); j--)
+      if(parts[j] >= 2 && !straddles(j)){ crotch = j; break; }
+    const hip = maxT(Math.max(crotch + 2, frac(0.47)), frac(0.58));
+    const waist = minT(hip + 2, frac(0.70));
+    const chest = maxT(frac(0.68), frac(0.79));
+    const shoulder = maxT(frac(0.78), frac(0.88));
+    const neck = minT(shoulder + 1, frac(0.94));
+    const knee = minT(frac(0.20), frac(0.34));
+    /* hands and elbows hang at settled fractions below the measured shoulder */
+    const span = Math.max(top - ground, 1);
+    const elbow = clamp(Math.round(shoulder - span*0.195), ground + 2, NY - 1);
+    const wrist = clamp(Math.round(shoulder - span*0.355), ground + 2, NY - 1);
+    /* Ramanujan's ellipse perimeter from the two half-axes */
+    const girth = j => {
+      const a = torso[j] || width[j]/2, b = depth[j]/2;
+      if(!a || !b) return 0;
+      const h = Math.pow(a-b, 2) / Math.pow(a+b, 2);
+      return Math.PI * (a+b) * (1 + 3*h/(10 + Math.sqrt(4 - 3*h))) * 100;
+    };
+    /* signed x of each run centre, in metres from the turning axis */
+    const runCentres = j => (runsAt[j] || []).map(r => ((r[0]+r[1])/2 - (NX-1)/2) * cellX);
+    const outerRun = j => {
+      const cs = runCentres(j);
+      if(!cs.length) return null;
+      return [Math.max.apply(null, cs), Math.min.apply(null, cs)];
+    };
+    const yOf = j => (j - ground) * cellY;
+    let headR = 0;
+    for(let j = Math.round(top - (top - ground)*0.11); j <= top; j++) headR = Math.max(headR, width[j]/2);
+    headR = Math.max(headR, 0.06);
+    const footRun = outerRun(Math.min(top, ground + 3)) || [0.09, -0.09];
+    const wristRun = outerRun(wrist) || [(torso[wrist] || 0.16), -(torso[wrist] || 0.16)];
+    const armAt = s => (s > 0 ? wristRun[0] : wristRun[1]);
+    const depthRatio = clamp((depth[hip] || 0.2) / Math.max((torso[hip] || 0.15) * 2, 1e-3), 0.45, 1);
+    const V3 = (x, y, z) => new THREE.Vector3(x, y, z);
+    const shoulderX = s => s * Math.max(torso[shoulder] * 0.9, 0.08);
+    const jAt = y => clamp(Math.round(y / cellY + ground), 0, NY - 1);
+    return {
+      ground, top, cellY, cellX, spanX, H,
+      y: yOf,
+      lm: { shoulder, neck, hip, waist, chest, crotch, knee, wrist, elbow, ground, top },
+      width, depth, torso, parts, area, runsAt,
+      L: {
+        H, source: "scan", depthRatio,
+        headTop: yOf(top), headR: headR, headY: yOf(top) - headR * 1.05,
+        neckY: yOf(neck), shoulderY: yOf(shoulder), chestY: yOf(chest),
+        waistY: yOf(waist), hipY: yOf(hip), crotchY: yOf(crotch),
+        kneeY: yOf(knee), ankleY: Math.max(yOf(ground + 4), 0.03),
+        elbowY: yOf(elbow), wristY: yOf(wrist),
+        torsoR: y => Math.max(torso[jAt(y)] || 0.02, 0.02),
+        maxR: y => Math.max((width[jAt(y)] || 0.04) / 2, 0.02),
+        shoulder: s => V3(shoulderX(s), yOf(shoulder), 0),
+        elbow: s => V3(s * Math.max(Math.abs(armAt(s)), Math.abs(shoulderX(s))) * 0.98, yOf(elbow), 0.004),
+        wrist: s => V3(armAt(s), yOf(wrist), 0.01),
+        hip: s => V3(s * Math.max(torso[hip] * 0.45, 0.04), yOf(crotch), 0),
+        knee: s => V3(s * Math.max(torso[knee] * 0.5, 0.035), yOf(knee), 0),
+        ankle: s => V3(s > 0 ? footRun[0] : footRun[1], Math.max(yOf(ground + 4), 0.03), 0),
+        footHalf: Math.max(Math.abs(footRun[0] - footRun[1]) / 4, 0.035)
+      },
+      meas: {
+        heightCm,
+        chestCm: Math.round(girth(chest)),
+        waistCm: Math.round(girth(waist)),
+        hipCm: Math.round(girth(hip)),
+        shoulderCm: Math.round(torso[shoulder] * 2 * 100),
+        inseamCm: Math.round((crotch - ground) * cellY * 100)
+      }
+    };
+  }
+
+  /* ---------- projective colour ---------- */
+  function colourise(geo, frames, info, headTex){
+    const n = geo.pos.length / 3;
+    const col = new Float32Array(n * 3);
+    const nrm = geo.normals;
+    const views = [
+      { f: frames.front, dir: [0,0,1],  u: (i,j,k) => Math.round(i/(NX-1)*(MW-1)) },
+      { f: frames.right, dir: [-1,0,0], u: (i,j,k) => Math.round(k/(NZ-1)*(MW-1)) },
+      { f: frames.back,  dir: [0,0,-1], u: (i,j,k) => MW-1 - Math.round(i/(NX-1)*(MW-1)) },
+      { f: frames.left,  dir: [1,0,0],  u: (i,j,k) => MW-1 - Math.round(k/(NZ-1)*(MW-1)) }
+    ];
+    const neckJ = info.lm.neck;
+    for(let v = 0; v < n; v++){
+      const i = geo.pos[v*3], j = geo.pos[v*3+1], k = geo.pos[v*3+2];
+      const nx = nrm[v*3], ny = nrm[v*3+1], nz = nrm[v*3+2];
+      const row = Math.round((1 - j/(NY-1)) * (MH-1));
+      let r = 0, g = 0, b = 0, w = 0;
+      for(const view of views){
+        const d = nx*view.dir[0] + ny*view.dir[1] + nz*view.dir[2];
+        if(d <= 0.02) continue;
+        const wt = Math.pow(d, 2.2);
+        const u = view.u(i, j, k);
+        if(u < 0 || u >= MW || row < 0 || row >= MH) continue;
+        const t = (row*MW + u) * 4;
+        r += view.f.tex[t] * wt; g += view.f.tex[t+1] * wt; b += view.f.tex[t+2] * wt; w += wt;
+      }
+      if(w < 1e-4){ col[v*3] = 0.55; col[v*3+1] = 0.52; col[v*3+2] = 0.50; continue; }
+      let cr = r/w/255, cg = g/w/255, cb = b/w/255;
+      if(headTex && j > neckJ){
+        const blend = clamp((j - neckJ) / Math.max(6, (info.lm.top - neckJ) * 0.35), 0, 1);
+        const ang = Math.atan2(k - NZ/2, -(i - NX/2));
+        const uu = ((ang / (Math.PI*2)) + 1) % 1;
+        const hv = clamp((info.lm.top - j) / Math.max(1, info.lm.top - neckJ), 0, 1);
+        const hp = headTex.get(uu, hv);
+        cr = cr*(1-blend) + hp[0]*blend; cg = cg*(1-blend) + hp[1]*blend; cb = cb*(1-blend) + hp[2]*blend;
+      }
+      /* to linear, so the renderer's sRGB output does not double-brighten */
+      col[v*3] = Math.pow(cr, 2.2); col[v*3+1] = Math.pow(cg, 2.2); col[v*3+2] = Math.pow(cb, 2.2);
+    }
+    return col;
+  }
+
+  /* ---------- the build ---------- */
+  async function build(cfg, report){
+    /* yield so the progress line can paint — but never wait on a throttled
+       timer in a hidden tab, where there is nothing to paint anyway */
+    const say = s => {
+      if(report) report(s);
+      return document.hidden ? Promise.resolve() : new Promise(r => setTimeout(r, 0));
+    };
+    await say("Reading the empty room…");
+    let plate = null;
+    if(cfg.plate){
+      const u = await Store.imageURL(cfg.plate);
+      if(u) plate = await loadImage(u);
+    }
+    const frames = {};
+    for(const key of ["front","right","back","left"]){
+      if(!cfg.shots[key]) continue;
+      await say("Cutting you out of the " + key + " frame…");
+      frames[key] = await frameFor(cfg.shots[key], plate, cfg.sensitivity);
+    }
+    if(!frames.front || !(frames.right || frames.left))
+      return { ok:false, error:"A scan needs at least the front and one side. Shoot those two and try again." };
+    const mirror = f => {
+      const m = new Uint8Array(MW*MH), t = new Uint8ClampedArray(MW*MH*4);
+      for(let v = 0; v < MH; v++) for(let u = 0; u < MW; u++){
+        m[v*MW+u] = f.mask[v*MW + (MW-1-u)];
+        const a = (v*MW+u)*4, b = (v*MW + (MW-1-u))*4;
+        t[a] = f.tex[b]; t[a+1] = f.tex[b+1]; t[a+2] = f.tex[b+2]; t[a+3] = 255;
+      }
+      return { mask:m, tex:t, mirrored:true };
+    };
+    if(!frames.back) frames.back = mirror(frames.front);
+    if(!frames.right) frames.right = mirror(frames.left);
+    if(!frames.left) frames.left = mirror(frames.right);
+
+    await say("Carving the volume…");
+    const vol = carve(frames);
+    let filled = 0;
+    for(let p = 0; p < vol.length; p++) filled += vol[p];
+    if(filled < 4000) return { ok:false, error:"The silhouettes did not overlap into a body. Try more sensitivity, or reshoot with a plainer background." };
+
+    await say("Smoothing…");
+    const field = blur(vol);
+    await say("Building the surface…");
+    const geo = surfaceNets(field, 0.47);
+    if(geo.idx.length < 300) return { ok:false, error:"Not enough surface came out of the scan. Try again with more even light." };
+    relax(geo.pos, geo.idx, 3, 0.45);
+
+    const info = analyse(vol, cfg.heightCm);
+    await say("Painting on your photographs…");
+    const g = new THREE.BufferGeometry();
+    g.setAttribute("position", new THREE.BufferAttribute(geo.pos, 3));
+    g.setIndex(new THREE.BufferAttribute(geo.idx, 1));
+    g.computeVertexNormals();
+    geo.normals = g.attributes.normal.array;
+    const colours = colourise(geo, frames, info, cfg.headTex || null);
+    g.setAttribute("color", new THREE.BufferAttribute(colours, 3));
+
+    /* voxel units into metres, feet on the floor, hips on the axis */
+    const s = info.cellY;
+    g.scale(s, s, s);
+    g.translate(-(NX-1)/2 * s, -info.ground * s, -(NZ-1)/2 * s);
+    g.computeBoundingBox();
+    return { ok:true, geometry:g, info, frames, vertices: geo.pos.length/3, previews: {
+      front: previewURL(frames.front),
+      right: frames.right.mirrored ? null : previewURL(frames.right),
+      back:  frames.back.mirrored ? null : previewURL(frames.back),
+      left:  frames.left.mirrored ? null : previewURL(frames.left)
+    } };
+  }
+
+  async function previewOne(ref, plateRef, sens){
+    let plate = null;
+    if(plateRef){ const u = await Store.imageURL(plateRef); if(u) plate = await loadImage(u); }
+    const f = await frameFor(ref, plate, sens);
+    return f ? previewURL(f) : null;
+  }
+
+  return { build, previewOne, MW, MH, NX, NY, NZ };
+})();
+</script>
+
+<script>
+/* ------------------------- 4. THE FIGURE (three.js) ---------------------- */
+/* Two bodies behind one set of landmarks. Without a scan it is a mannequin
+   built to your measurements. With a scan it is the mesh carved out of your
+   own silhouettes. Garments read the landmarks, so they fit either one:
+   fitted pieces are the body's own surface pushed outward, flared pieces
+   are turned from its measured radius. */
+
+const Figure = (() => {
+  let renderer, scene, camera, root, bodyG, wearG, headMesh, floorMesh;
+  let yaw = 0, elev = 0.10, zoomF = 1.03, need = 3, spin = false, dirty = true, mounted = false;
+  let reduceMotion = false;
+  let SCAN = null;                       /* {geometry, info, meas} once built */
+  const swatchCache = new Map();
+  let onYaw = () => {};
+
+  const V = (x,y,z) => new THREE.Vector3(x,y,z);
+  const useScan = () => !!(SCAN && State.profile.useScan !== false);
+
+  /* ---------------- mannequin proportions ---------------- */
+  function props(pf){
+    const H = pf.heightCm / 100;
+    const depth = 0.68, k = 2 / (1 + depth);
+    const shoulderHalf = (pf.shoulderCm / 100) / 2;
+    const waistR = (pf.waistCm / 100) / (2 * Math.PI) * k;
+    const hipR   = (pf.hipCm  / 100) / (2 * Math.PI) * k;
+    const chestR = Math.max(waistR * 1.12, shoulderHalf * 0.80);
+    return { H, depth, sh: shoulderHalf / H, ch: chestR / H, wa: waistR / H, hp: hipR / H,
+             headR: 0.063, headY: 0.934 };
+  }
+  function profileCurve(P){
+    return [[0.014,0.900],[0.033,0.862],[0.038,0.844],
+            [P.sh,0.818],[P.sh*0.94,0.786],[P.ch,0.748],[P.ch*0.94,0.700],
+            [P.wa,0.630],[P.wa*1.07,0.584],[P.hp,0.526],[P.hp*0.95,0.490],[0.052,0.472]];
+  }
+  function curveRadius(P, yf){
+    const c = profileCurve(P);
+    if(yf >= c[0][1]) return c[0][0];
+    if(yf <= c[c.length-1][1]) return c[c.length-1][0];
+    for(let i = 0; i < c.length-1; i++){
+      const a = c[i], b = c[i+1];
+      if(yf <= a[1] && yf >= b[1]){ const t = (a[1]-yf)/(a[1]-b[1]); return a[0] + (b[0]-a[0])*t; }
+    }
+    return c[0][0];
+  }
+
+  /* ---------------- the landmark set both bodies answer to ---------------- */
+  function paramLandmarks(pf){
+    const P = props(pf), H = P.H;
+    const sx = P.sh * H * 0.92, hx = P.hp * H * 0.44;
+    return {
+      H, source:"mannequin", depthRatio:P.depth, P,
+      headR: P.headR*H, headY: P.headY*H, headTop: P.headY*H + P.headR*H*1.17,
+      neckY: 0.836*H, shoulderY: 0.812*H, chestY: 0.748*H, waistY: 0.628*H,
+      hipY: 0.520*H, crotchY: 0.486*H, kneeY: 0.276*H, ankleY: 0.050*H,
+      elbowY: 0.612*H, wristY: 0.462*H, footHalf: 0.026*H,
+      torsoR: y => curveRadius(P, y/H) * H,
+      maxR:   y => curveRadius(P, y/H) * H,
+      shoulder: s => V(sx*s, 0.812*H, 0),
+      elbow:    s => V((sx + 0.014*H)*s, 0.612*H, 0.005*H),
+      wrist:    s => V((sx + 0.026*H)*s, 0.462*H, 0.012*H),
+      hip:      s => V(hx*s, 0.486*H, 0),
+      knee:     s => V(hx*0.94*s, 0.276*H, 0.004*H),
+      ankle:    s => V(hx*0.90*s, 0.050*H, 0)
+    };
+  }
+  function marks(){ return useScan() ? SCAN.info.L : paramLandmarks(State.profile); }
+  function hemAt(L, name){
+    const map = {
+      waist: L.waistY, hip: L.hipY,
+      thigh: L.crotchY - (L.crotchY - L.kneeY) * 0.45,
+      knee:  L.kneeY, ankle: L.ankleY, floor: L.ankleY * 0.45
+    };
+    return map[name] !== undefined ? map[name] : L.hipY;
+  }
+
+  /* ---------------- mesh helpers ---------------- */
+  function tube(a, b, rA, rB, mat, seg){
+    const dir = new THREE.Vector3().subVectors(b, a), len = dir.length();
+    if(len < 1e-5) return new THREE.Object3D();
+    const m = new THREE.Mesh(new THREE.CylinderGeometry(rB, rA, len, seg || 20, 1, false), mat);
+    m.position.copy(a).lerp(b, 0.5);
+    m.quaternion.setFromUnitVectors(V(0,1,0), dir.clone().normalize());
+    m.castShadow = true; m.receiveShadow = true;
+    return m;
+  }
+  function ball(p, r, mat, sc){
+    const m = new THREE.Mesh(new THREE.SphereGeometry(r, 22, 16), mat);
+    m.position.copy(p); if(sc) m.scale.set(sc[0], sc[1], sc[2]);
+    m.castShadow = true; m.receiveShadow = true; return m;
+  }
+  function box(w,h,d,mat){ const m = new THREE.Mesh(new THREE.BoxGeometry(w,h,d), mat);
+    m.castShadow = true; m.receiveShadow = true; return m; }
+  function ring(R, r, mat){ const m = new THREE.Mesh(new THREE.TorusGeometry(R, r, 10, 34), mat);
+    m.rotation.x = Math.PI/2; m.castShadow = true; return m; }
+
+  /* a surface of revolution from the body's own measured radius */
+  function lathe(L, yLo, yHi, t, flare, mat, cap){
+    const N = 26, pts = [];
+    if(yHi - yLo < 0.005) return new THREE.Object3D();
+    if(cap) pts.push(new THREE.Vector2(0.004, yLo));
+    const floorR = y => L.torsoR(Math.max(y, L.crotchY + 0.02));
+    for(let i = 0; i <= N; i++){
+      const y = yLo + (yHi - yLo) * i/N;
+      let r = (y < L.crotchY ? floorR(y) : L.torsoR(y)) + t;
+      if(flare > 1){
+        const k = 1 - (y - yLo) / (yHi - yLo);
+        r *= 1 + (flare - 1) * Math.pow(k, 1.8);
+      }
+      pts.push(new THREE.Vector2(Math.max(r, 0.012), y));
+    }
+    const m = new THREE.Mesh(new THREE.LatheGeometry(pts, 40), mat);
+    m.scale.z = L.depthRatio;
+    m.castShadow = true; m.receiveShadow = true;
+    return m;
+  }
+
+  /* the scan's own surface, pushed out along its normals */
+  function scanShell(L, yLo, yHi, t, sleeve){
+    const src = SCAN.geometry;
+    const pos = src.attributes.position.array, nrm = src.attributes.normal.array;
+    const index = src.index.array;
+    const map = new Int32Array(pos.length/3).fill(-1);
+    const P = [], N = [], U = [], I = [];
+    const armLimit = sleeve === "none" ? L.shoulderY - 0.03
+                   : sleeve === "short" ? L.elbowY
+                   : L.wristY;
+    const ok = v => {
+      const x = pos[v*3], y = pos[v*3+1];
+      if(y < yLo || y > yHi) return false;
+      if(sleeve !== "all" && Math.abs(x) > L.torsoR(y) * 1.05 && y < armLimit) return false;
+      return true;
+    };
+    for(let f = 0; f < index.length; f += 3){
+      const tri = [index[f], index[f+1], index[f+2]];
+      if(!ok(tri[0]) || !ok(tri[1]) || !ok(tri[2])) continue;
+      for(let m = 0; m < 3; m++){
+        const v = tri[m];
+        if(map[v] < 0){
+          map[v] = P.length / 3;
+          const x = pos[v*3], y = pos[v*3+1], z = pos[v*3+2];
+          const nx = nrm[v*3], ny = nrm[v*3+1], nz = nrm[v*3+2];
+          P.push(x + nx*t, y + ny*t, z + nz*t);
+          N.push(nx, ny, nz);
+          U.push((x*0.7071 + z*0.7071) / 0.26, y / 0.26);
+        }
+        I.push(map[v]);
+      }
+    }
+    if(I.length < 3) return null;
+    const g = new THREE.BufferGeometry();
+    g.setAttribute("position", new THREE.Float32BufferAttribute(P, 3));
+    g.setAttribute("normal", new THREE.Float32BufferAttribute(N, 3));
+    g.setAttribute("uv", new THREE.Float32BufferAttribute(U, 2));
+    g.setIndex(I);
+    return g;
+  }
+  /* fitted above the crotch, hanging as a tube below it */
+  function drape(L, yLo, yHi, t, flare, sleeve, mat){
+    const g = new THREE.Group();
+    const split = L.crotchY + 0.012;
+    const shellLo = Math.max(yLo, split);
+    if(yHi > shellLo + 0.012){
+      const geo = scanShell(L, shellLo, yHi, t, sleeve);
+      if(geo){ const m = new THREE.Mesh(geo, mat); m.castShadow = true; m.receiveShadow = true; g.add(m); }
+    }
+    if(yLo < split - 0.005) g.add(lathe(L, yLo, Math.min(split + 0.03, yHi), t, flare, mat));
+    return g;
+  }
+
+  /* ---------------- fabric ---------------- */
+  function swatchOf(item){
+    if(swatchCache.has(item.id)) return swatchCache.get(item.id);
+    const p = (async () => {
+      const src = item.swatch || item.photo;
+      if(!src) return null;
+      const url = await Store.imageURL(src);
+      if(!url) return null;
+      try{
+        const img = await loadImage(url);
+        const c = document.createElement("canvas"); c.width = c.height = 256;
+        const s = Math.min(img.width, img.height) * 0.46;
+        c.getContext("2d").drawImage(img, (img.width-s)/2, (img.height-s)/2, s, s, 0, 0, 256, 256);
+        return c;
+      }catch(e){ return null; }
+    })();
+    swatchCache.set(item.id, p); return p;
+  }
+  const ROUGH = { leather:.42, silk:.30, satin:.28, denim:.86, wool:.82, linen:.88,
+                  cotton:.84, suede:.95, knit:.90, nylon:.55, velvet:.75 };
+  function roughnessOf(item){
+    const f = (item.fabric || "").toLowerCase();
+    for(const k in ROUGH) if(f.includes(k)) return ROUGH[k];
+    return item.cat === "shoes" ? .48 : .84;
+  }
+  function garmentMat(item, rep){
+    const m = new THREE.MeshStandardMaterial({
+      color: new THREE.Color(item.colour || "#8A8A8A"),
+      roughness: roughnessOf(item), metalness: item.cat === "shoes" ? .12 : .02,
+      side: THREE.DoubleSide
+    });
+    swatchOf(item).then(c => {
+      if(!c) return;
+      const t = new THREE.CanvasTexture(c);
+      t.wrapS = t.wrapT = THREE.RepeatWrapping;
+      t.repeat.set(rep || 2.6, rep || 2.6);
+      t.encoding = THREE.sRGBEncoding;
+      m.map = t; m.color.set("#ffffff"); m.needsUpdate = true; invalidate();
+    });
+    return m;
+  }
+
+  /* ---------------- selfie panorama for the mannequin head ---------------- */
+  function stripAverage(img, y0, y1){
+    const c = document.createElement("canvas"); c.width = 24; c.height = 8;
+    const g = c.getContext("2d", { willReadFrequently:true });
+    g.drawImage(img, 0, img.height*y0, img.width, img.height*(y1-y0), 0, 0, 24, 8);
+    const d = g.getImageData(0,0,24,8).data;
+    let r=0,gg=0,b=0;
+    for(let i=0;i<d.length;i+=4){ r+=d[i]; gg+=d[i+1]; b+=d[i+2]; }
+    const n = d.length/4;
+    return rgbToHex(r/n, gg/n, b/n);
+  }
+  function featherDraw(g, img, cx, w, top, h){
+    const W = g.canvas.width;
+    const t = document.createElement("canvas");
+    t.width = Math.ceil(w); t.height = Math.ceil(h);
+    const tg = t.getContext("2d");
+    const s = Math.max(w/img.width, h/img.height);
+    tg.drawImage(img, (w - img.width*s)/2, (h - img.height*s)/2, img.width*s, img.height*s);
+    tg.globalCompositeOperation = "destination-in";
+    const gh = tg.createLinearGradient(0,0,w,0);
+    gh.addColorStop(0,"rgba(0,0,0,0)"); gh.addColorStop(.20,"rgba(0,0,0,1)");
+    gh.addColorStop(.80,"rgba(0,0,0,1)"); gh.addColorStop(1,"rgba(0,0,0,0)");
+    tg.fillStyle = gh; tg.fillRect(0,0,w,h);
+    const gv = tg.createLinearGradient(0,0,0,h);
+    gv.addColorStop(0,"rgba(0,0,0,0)"); gv.addColorStop(.16,"rgba(0,0,0,1)");
+    gv.addColorStop(.84,"rgba(0,0,0,1)"); gv.addColorStop(1,"rgba(0,0,0,0)");
+    tg.fillStyle = gv; tg.fillRect(0,0,w,h);
+    tg.globalCompositeOperation = "source-over";
+    g.drawImage(t, cx - w/2, top);
+    if(cx - w/2 < 0) g.drawImage(t, cx - w/2 + W, top);
+    if(cx + w/2 > W) g.drawImage(t, cx - w/2 - W, top);
+  }
+  /* u: 0 right, 0.25 front, 0.5 left, 0.75 back */
+  async function headCanvas(pf){
+    const W = 1024, H = 512;
+    const c = document.createElement("canvas"); c.width = W; c.height = H;
+    const g = c.getContext("2d");
+    g.fillStyle = pf.skin || "#C6A182"; g.fillRect(0,0,W,H);
+    const slots = [["right",0],["front",.25],["left",.5],["back",.75]];
+    const imgs = [];
+    for(const [key,u] of slots){
+      const ref = pf.selfies && pf.selfies[key];
+      if(!ref) continue;
+      const url = await Store.imageURL(ref);
+      if(!url) continue;
+      try{ imgs.push([key, u, await loadImage(url)]); }catch(e){}
+    }
+    if(!imgs.length) return null;
+    const src = imgs.find(i => i[0] === "front") || imgs[0];
+    g.fillStyle = stripAverage(src[2], 0.02, 0.13); g.fillRect(0, 0, W, H*0.20);
+    g.fillStyle = stripAverage(src[2], 0.86, 0.99); g.fillRect(0, H*0.86, W, H*0.14);
+    const zoom = pf.faceZoom || 1, off = pf.faceY || 0;
+    const bandH = H * 0.74 / zoom;
+    const top = H * (0.145 - off) + (H*0.74 - bandH)/2;
+    for(const [, u, img] of imgs) featherDraw(g, img, u*W, W/4*1.34, top, bandH);
+    return c;
+  }
+  /* the same panorama as a sampler, for painting a scanned head */
+  async function headSampler(pf){
+    const c = await headCanvas(pf);
+    if(!c) return null;
+    const d = c.getContext("2d", { willReadFrequently:true }).getImageData(0,0,c.width,c.height);
+    return { get(u, v){
+      const x = clamp(Math.round(u * (c.width-1)), 0, c.width-1);
+      const y = clamp(Math.round(v * (c.height-1)), 0, c.height-1);
+      const q = (y*c.width + x) * 4;
+      return [d.data[q]/255, d.data[q+1]/255, d.data[q+2]/255];
+    } };
+  }
+
+  /* ---------------- the body ---------------- */
+  function buildScanBody(pf){
+    const g = new THREE.Group();
+    const flat = pf.scanPhotoSkin === false;
+    const m = new THREE.Mesh(SCAN.geometry, new THREE.MeshStandardMaterial({
+      color: flat ? new THREE.Color(pf.skin || "#C6A182") : new THREE.Color("#ffffff"),
+      vertexColors: !flat, roughness: .88, metalness: 0, side: THREE.DoubleSide
+    }));
+    m.castShadow = true; m.receiveShadow = true;
+    g.add(m);
+    return g;
+  }
+  function buildMannequin(pf){
+    const P = props(pf), H = P.H, L = paramLandmarks(pf);
+    const g = new THREE.Group();
+    const skin = new THREE.MeshStandardMaterial({
+      color: new THREE.Color(pf.skin || "#C6A182"), roughness:.78, metalness:0 });
+    const pts = [new THREE.Vector2(0.004, 0.472*H)];
+    for(let i = 0; i <= 26; i++){
+      const yf = 0.472 + (0.900-0.472)*i/26;
+      pts.push(new THREE.Vector2(Math.max(curveRadius(P, yf)*H, 0.006), yf*H));
+    }
+    const torso = new THREE.Mesh(new THREE.LatheGeometry(pts, 40), skin);
+    torso.scale.z = P.depth; torso.castShadow = true; torso.receiveShadow = true;
+    g.add(torso);
+    g.add(tube(V(0,0.836*H,0), V(0,0.886*H,0), 0.037*H, 0.034*H, skin));
+    for(const s of [1,-1]){
+      g.add(tube(L.shoulder(s), L.elbow(s), 0.032*H, 0.026*H, skin));
+      g.add(tube(L.elbow(s), L.wrist(s), 0.026*H, 0.020*H, skin));
+      g.add(ball(L.shoulder(s), 0.034*H, skin));
+      g.add(ball(L.elbow(s), 0.026*H, skin));
+      g.add(ball(L.wrist(s).add(V(0,-0.022*H,0)), 0.025*H, skin, [1,1.25,.7]));
+      g.add(tube(L.hip(s), L.knee(s), 0.055*H, 0.038*H, skin));
+      g.add(tube(L.knee(s), L.ankle(s), 0.038*H, 0.025*H, skin));
+      g.add(ball(L.knee(s), 0.037*H, skin));
+      const f = box(0.050*H, 0.030*H, 0.135*H, skin);
+      f.position.set(L.ankle(s).x, 0.026*H, 0.034*H);
+      g.add(f);
+    }
+    const head = new THREE.Mesh(new THREE.SphereGeometry(P.headR*H, 48, 34),
+      new THREE.MeshStandardMaterial({ color:new THREE.Color(pf.skin||"#C6A182"), roughness:.72 }));
+    head.position.y = P.headY * H;
+    head.scale.set(0.96, 1.17, 0.90);
+    head.castShadow = true;
+    g.add(head); headMesh = head;
+    headCanvas(pf).then(c => {
+      if(!c || !headMesh) return;
+      const t = new THREE.CanvasTexture(c);
+      t.encoding = THREE.sRGBEncoding;
+      t.anisotropy = renderer ? renderer.capabilities.getMaxAnisotropy() : 1;
+      headMesh.material.map = t; headMesh.material.color.set("#ffffff");
+      headMesh.material.needsUpdate = true; invalidate();
+    });
+    return g;
+  }
+
+  /* ---------------- garments ---------------- */
+  function sleeves(g, L, info, t, mat){
+    if(info.sleeve === "none") return;
+    const H = L.H, short = info.sleeve === "short";
+    for(const s of [1,-1]){
+      const a = L.shoulder(s), b = L.elbow(s);
+      const mid = short ? a.clone().lerp(b, 0.72) : b;
+      g.add(tube(a.clone().add(V(0,0.010*H,0)), mid, 0.034*H + t, (short?0.028*H:0.027*H) + t, mat));
+      if(!short) g.add(tube(b, L.wrist(s), 0.027*H + t, 0.022*H + t, mat));
+    }
+  }
+  function buildTop(L, item, extraT){
+    const info = subtypeInfo(item.cat, item.sub), H = L.H;
+    const t = (extraT || 0) + (info.thick || 1) * 0.0055;
+    const mat = garmentMat(item, 2.8);
+    const g = new THREE.Group();
+    const hem = hemAt(L, info.hem || "hip");
+    if(useScan()){
+      g.add(drape(L, hem, L.neckY, t, info.flare || 1, info.sleeve || "long", mat));
+    } else {
+      g.add(lathe(L, hem, L.neckY, t, 1, mat, false));
+      sleeves(g, L, info, t, mat);
+    }
+    if(info.collar){
+      const r = ring(L.torsoR(L.neckY) + t + 0.008, 0.011*H, mat);
+      r.position.y = L.neckY + 0.006*H; r.scale.z = 0.9; g.add(r);
+    }
+    if(info.open){
+      const mid = (L.neckY + Math.max(hem, L.crotchY)) / 2;
+      const seam = box(0.010*H, (L.neckY - Math.max(hem, L.crotchY)) * 0.92, 0.006*H,
+        new THREE.MeshStandardMaterial({ color:new THREE.Color(item.colour||"#888").multiplyScalar(0.72), roughness:.9 }));
+      seam.position.set(0, mid, (L.torsoR(mid) + t) * L.depthRatio + 0.004);
+      g.add(seam);
+    }
+    return g;
+  }
+  function buildBottom(L, item){
+    const info = subtypeInfo(item.cat, item.sub), H = L.H;
+    const t = 0.007, mat = garmentMat(item, 2.4);
+    const g = new THREE.Group();
+    const top = L.waistY + 0.012, hem = hemAt(L, info.len);
+    if(info.flare){
+      g.add(lathe(L, hem, top, t, info.flare, mat, false));
+    } else if(useScan()){
+      const geo = scanShell(L, hem, top, t, "all");
+      if(geo){ const m = new THREE.Mesh(geo, mat); m.castShadow = true; m.receiveShadow = true; g.add(m); }
+    } else {
+      g.add(lathe(L, L.crotchY - 0.01, top, t, 1, mat, false));
+      const k = clamp((L.kneeY - hem) / Math.max(L.kneeY - L.ankleY, 1e-4), 0, 1.18);
+      for(const s of [1,-1]){
+        const hip = L.hip(s), knee = L.knee(s), ank = L.ankle(s);
+        const slim = info.slim ? 0.004 : 0.011;
+        g.add(tube(hip.clone().add(V(0,0.02*H,0)), knee, 0.058*H + slim, 0.041*H + slim, mat));
+        if(k > 0.05) g.add(tube(knee, knee.clone().lerp(ank, k), 0.041*H + slim, 0.031*H + slim, mat));
+      }
+    }
+    const band = ring(L.torsoR(L.waistY) + t + 0.005, 0.010*H, mat);
+    band.position.y = L.waistY + 0.004; band.scale.z = L.depthRatio; g.add(band);
+    return g;
+  }
+  function buildDress(L, item){
+    const info = subtypeInfo(item.cat, item.sub), H = L.H;
+    const t = 0.0065, mat = garmentMat(item, 2.6);
+    const g = new THREE.Group();
+    const top = info.sleeve === "none" ? L.chestY + 0.04 : L.neckY;
+    const hem = hemAt(L, info.len);
+    if(info.trousers){
+      if(useScan()){
+        const geo = scanShell(L, hem, top, t, "all");
+        if(geo) g.add(new THREE.Mesh(geo, mat));
+      } else {
+        g.add(lathe(L, L.crotchY - 0.01, top, t, 1, mat, false));
+        for(const s of [1,-1]){
+          g.add(tube(L.hip(s).clone().add(V(0,0.02*H,0)), L.knee(s), 0.058*H+0.011, 0.041*H+0.011, mat));
+          g.add(tube(L.knee(s), L.ankle(s), 0.041*H+0.011, 0.031*H+0.011, mat));
+        }
+      }
+    } else if(useScan()){
+      g.add(drape(L, hem, top, t, info.flare || 1.3, info.sleeve || "none", mat));
+    } else {
+      g.add(lathe(L, hem, top, t, info.flare || 1.3, mat, false));
+    }
+    if(!useScan()) sleeves(g, L, info, t, mat);
+    return g;
+  }
+  function buildShoes(L, item){
+    const info = subtypeInfo(item.cat, item.sub), H = L.H;
+    const mat = garmentMat(item, 1.6);
+    const g = new THREE.Group();
+    const fh = L.footHalf;
+    for(const s of [1,-1]){
+      const x = L.ankle(s).x;
+      const sh = box(fh*2.2, 0.038*H, 0.150*H, mat);
+      sh.position.set(x, 0.028*H, 0.036*H); g.add(sh);
+      g.add(ball(V(x, 0.030*H, 0.104*H), fh*1.05, mat, [1, .85, 1.1]));
+      if(info.boot){
+        const topY = (info.boot > 1 ? 0.185 : 0.108) * H;
+        g.add(tube(V(x, 0.046*H, 0.006*H), V(x, topY, 0), fh*1.5, fh*1.42, mat));
+      }
+      if(info.heel){
+        const hl = box(fh*1.2, 0.046*H, 0.030*H, mat);
+        hl.position.set(x, 0.024*H, -0.026*H); g.add(hl);
+      }
+    }
+    return g;
+  }
+  function buildHead(L, item){
+    const info = subtypeInfo(item.cat, item.sub);
+    const mat = garmentMat(item, 2.0);
+    const g = new THREE.Group();
+    const hr = L.headR, cy = L.headTop - hr * 0.42;
+    const crown = new THREE.Mesh(new THREE.CylinderGeometry(hr*1.02, hr*1.12, hr*(info.brim?1.4:1.1), 30), mat);
+    crown.position.y = cy; crown.castShadow = true; g.add(crown);
+    const capTop = new THREE.Mesh(new THREE.SphereGeometry(hr*1.02, 26, 14, 0, Math.PI*2, 0, Math.PI/2), mat);
+    capTop.position.y = cy + hr*(info.brim?0.70:0.55); capTop.castShadow = true; g.add(capTop);
+    if(info.brim){
+      const brim = new THREE.Mesh(new THREE.CylinderGeometry(hr*(1.6+info.brim*0.5), hr*(1.6+info.brim*0.5), hr*0.09, 34), mat);
+      brim.position.y = cy - hr*0.70; brim.castShadow = true; g.add(brim);
+    } else if(item.sub === "Baseball cap" || item.sub === "Flat cap"){
+      const peak = new THREE.Mesh(new THREE.CylinderGeometry(hr*1.35, hr*1.35, hr*0.08, 26, 1, false, -0.9, 1.8), mat);
+      peak.position.set(0, cy - hr*0.50, hr*0.30); peak.castShadow = true; g.add(peak);
+    }
+    return g;
+  }
+  function buildBag(L, item){
+    const H = L.H, mat = garmentMat(item, 1.8), g = new THREE.Group();
+    const w = L.wrist(-1);
+    if(item.sub === "Clutch"){
+      const b = box(0.16*H, 0.075*H, 0.022*H, mat);
+      b.position.set(w.x - 0.02*H, w.y - 0.03*H, 0.05*H); b.rotation.z = 0.15; g.add(b);
+    } else if(item.sub === "Backpack"){
+      const b = box(0.20*H, 0.26*H, 0.085*H, mat);
+      b.position.set(0, L.chestY - 0.02*H, -(L.torsoR(L.chestY)*L.depthRatio + 0.055*H)); g.add(b);
+      for(const s of [1,-1]) g.add(tube(L.shoulder(s), V(s*0.06*H, L.waistY, -0.06*H), 0.010*H, 0.010*H, mat));
+    } else {
+      const b = box(0.17*H, 0.20*H, 0.070*H, mat);
+      b.position.set(w.x - 0.045*H, w.y - 0.045*H, 0.015*H); g.add(b);
+      g.add(tube(L.shoulder(-1), V(b.position.x, b.position.y + 0.10*H, b.position.z), 0.009*H, 0.009*H, mat));
+    }
+    return g;
+  }
+  /* how far out the layers already worn push the front of the chest */
+  function layerZ(){
+    let z = 0.006;
+    if(State.outfit.top || State.outfit.dress) z += 0.008;
+    if(State.outfit.outerwear){
+      const it = itemById(State.outfit.outerwear);
+      const info = it ? subtypeInfo(it.cat, it.sub) : null;
+      z += 0.016 + ((info && info.thick) ? info.thick : 2) * 0.0055;
+    }
+    return z;
+  }
+  function buildAccessory(L, item){
+    const info = subtypeInfo(item.cat, item.sub), H = L.H;
+    const mat = garmentMat(item, 1.4), g = new THREE.Group();
+    const lz = layerZ();
+    const frontZ = y => L.torsoR(y) * L.depthRatio + 0.010 + lz;
+    const chest = L.chestY - 0.02*H, neck = L.neckY;
+    switch(info.shape){
+      case "tie": {
+        const t1 = box(0.035*H, 0.20*H, 0.008*H, mat);
+        t1.position.set(0, chest - 0.03*H, frontZ(chest)); t1.rotation.x = -0.06; g.add(t1);
+        const knot = box(0.030*H, 0.032*H, 0.014*H, mat);
+        knot.position.set(0, neck - 0.005*H, frontZ(neck)); g.add(knot);
+        const t2 = box(0.030*H, 0.075*H, 0.008*H, mat);
+        t2.position.set(0, (neck + chest)/2 + 0.02*H, frontZ(neck - 0.03*H)); g.add(t2); break;
+      }
+      case "bow": {
+        for(const s of [1,-1]){ const b = box(0.036*H, 0.026*H, 0.012*H, mat);
+          b.position.set(s*0.026*H, neck, frontZ(neck)); b.rotation.z = s*0.25; g.add(b); }
+        const c = box(0.014*H, 0.020*H, 0.014*H, mat); c.position.set(0, neck, frontZ(neck)); g.add(c); break;
+      }
+      case "pocket": { const p = box(0.045*H, 0.020*H, 0.006*H, mat);
+        p.position.set(0.075*H, chest + 0.01*H, frontZ(chest)); g.add(p); break; }
+      case "scarf": { const r = ring(L.torsoR(neck) + 0.016*H + lz, 0.020*H, mat);
+        r.position.y = neck; r.scale.z = 0.95; g.add(r);
+        const tail = box(0.055*H, 0.16*H, 0.020*H, mat);
+        tail.position.set(0.03*H, chest - 0.02*H, frontZ(chest)); tail.rotation.z = 0.10; g.add(tail); break; }
+      case "belt": { const r = ring(L.torsoR(L.waistY) + 0.016, 0.013*H, mat);
+        r.position.y = L.waistY; r.scale.z = L.depthRatio; g.add(r);
+        const bk = box(0.040*H, 0.030*H, 0.012*H,
+          new THREE.MeshStandardMaterial({ color:0xd9c9a3, roughness:.35, metalness:.7 }));
+        bk.position.set(0, L.waistY, L.torsoR(L.waistY) * L.depthRatio + 0.020); g.add(bk); break; }
+      case "neck": { const r = ring(L.torsoR(neck) + 0.010*H + lz, 0.006*H, mat);
+        r.position.y = neck - 0.025*H; r.scale.z = 0.95; r.rotation.x = Math.PI/2 - 0.35; g.add(r); break; }
+      case "wrist": { const w = L.wrist(-1);
+        const r = ring(0.026*H, 0.007*H, mat); r.position.copy(w); r.rotation.x = 0.25; g.add(r); break; }
+      case "glasses": {
+        const hr = L.headR, hy = L.headY + hr*0.10, hz = hr*0.88;
+        for(const s of [1,-1]){ const l = ring(hr*0.30, hr*0.045, mat);
+          l.rotation.x = 0; l.position.set(s*hr*0.34, hy, hz); g.add(l); }
+        const br = box(hr*0.24, hr*0.05, hr*0.05, mat); br.position.set(0, hy + hr*0.04, hz); g.add(br);
+        for(const s of [1,-1]) g.add(tube(V(s*hr*0.62, hy, hz*0.86), V(s*hr*0.90, hy, -hr*0.5), hr*0.03, hr*0.03, mat, 8));
+        break; }
+      case "gloves": { for(const s of [1,-1]){
+          const w = L.wrist(s); g.add(ball(w.clone().add(V(0,-0.024*H,0)), 0.028*H, mat, [1,1.25,.75])); } break; }
+      default: { const r = ring(L.torsoR(chest) + 0.012, 0.008*H, mat); r.position.y = chest; g.add(r); }
+    }
+    return g;
+  }
+
+  /* ---------------- assembly ---------------- */
+  function disposeTree(o, keepGeom){
+    o.traverse(n => {
+      if(n.geometry && n.geometry !== keepGeom) n.geometry.dispose();
+      if(n.material){ if(n.material.map) n.material.map.dispose(); n.material.dispose(); }
+    });
+  }
+  function rebuildWear(){
+    if(!scene) return;
+    if(wearG){ root.remove(wearG); disposeTree(wearG); }
+    wearG = new THREE.Group();
+    const L = marks();
+    const order = ["bottom","dress","top","outerwear","shoes","headwear","bag"];
+    for(const slot of order){
+      const id = State.outfit[slot]; if(!id) continue;
+      const it = itemById(id); if(!it) continue;
+      let g = null;
+      try{
+        if(slot === "top") g = buildTop(L, it, 0);
+        else if(slot === "outerwear") g = buildTop(L, it, 0.014);
+        else if(slot === "bottom") g = buildBottom(L, it);
+        else if(slot === "dress") g = buildDress(L, it);
+        else if(slot === "shoes") g = buildShoes(L, it);
+        else if(slot === "headwear") g = buildHead(L, it);
+        else if(slot === "bag") g = buildBag(L, it);
+      }catch(e){ g = null; }
+      if(g) wearG.add(g);
+    }
+    for(const id of (State.outfit.accessory || [])){
+      const it = itemById(id); if(!it) continue;
+      try{ wearG.add(buildAccessory(L, it)); }catch(e){}
+    }
+    root.add(wearG);
+    invalidate();
+  }
+  function rebuildBody(){
+    if(!scene) return;
+    if(bodyG){ root.remove(bodyG); disposeTree(bodyG, SCAN ? SCAN.geometry : null); }
+    headMesh = null;
+    bodyG = useScan() ? buildScanBody(State.profile) : buildMannequin(State.profile);
+    root.add(bodyG);
+    frame();
+    invalidate();
+  }
+
+  /* ---------------- scene ---------------- */
+  function mount(container){
+    if(mounted) return;
+    if(typeof THREE === "undefined"){
+      container.innerHTML = '<div style="display:grid;place-items:center;height:100%;padding:24px;text-align:center;color:var(--muted)">The 3D library did not load. Reload the page to try again.</div>';
+      return;
+    }
+    reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    renderer = new THREE.WebGLRenderer({ antialias:true, alpha:true, powerPreference:"high-performance" });
+    renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+    renderer.setClearAlpha(0);
+    renderer.outputEncoding = THREE.sRGBEncoding;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.06;
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    container.insertBefore(renderer.domElement, container.firstChild);
+
+    scene = new THREE.Scene();
+    camera = new THREE.PerspectiveCamera(32, 1, 0.1, 60);
+    root = new THREE.Group(); scene.add(root);
+
+    scene.add(new THREE.HemisphereLight(0xd8e4f7, 0x36302a, 0.62));
+    const key = new THREE.DirectionalLight(0xffe9c9, 1.25);
+    key.position.set(1.7, 3.2, 2.6); key.castShadow = true;
+    key.shadow.mapSize.set(1024,1024);
+    const cam = key.shadow.camera;
+    cam.left = -1.3; cam.right = 1.3; cam.top = 2.4; cam.bottom = -0.4; cam.near = .5; cam.far = 9;
+    scene.add(key);
+    const fill = new THREE.DirectionalLight(0xbed4ff, 0.38); fill.position.set(-2.4, 1.5, 1.8); scene.add(fill);
+    const rim = new THREE.DirectionalLight(0xffffff, 0.5); rim.position.set(-0.4, 2.0, -3.2); scene.add(rim);
+
+    floorMesh = new THREE.Mesh(new THREE.PlaneGeometry(6,6), new THREE.ShadowMaterial({ opacity:.30 }));
+    floorMesh.rotation.x = -Math.PI/2; floorMesh.receiveShadow = true; scene.add(floorMesh);
+
+    mounted = true;
+    rebuildBody();
+    rebuildWear();
+    new ResizeObserver(() => resize(container)).observe(container);
+    resize(container);
+    tick();
+  }
+  function resize(container){
+    if(!renderer) return;
+    const w = container.clientWidth || 600, h = container.clientHeight || 600;
+    renderer.setSize(w, h, false);
+    camera.aspect = w/h; camera.updateProjectionMatrix();
+    frame(); invalidate();
+  }
+  function bodyHeight(){ return useScan() ? SCAN.info.H : State.profile.heightCm/100; }
+  function frame(){
+    if(!camera) return;
+    const H = bodyHeight();
+    const vFov = camera.fov * Math.PI/180;
+    const hFov = 2*Math.atan(Math.tan(vFov/2) * (camera.aspect || 1));
+    need = Math.max((H*1.14) / (2*Math.tan(vFov/2)), (H*0.46) / (2*Math.tan(hFov/2)));
+    place();
+  }
+  function place(){
+    const H = bodyHeight(), ty = H*0.52, d = need * zoomF;
+    camera.position.set(0, ty + d*Math.sin(elev), d*Math.cos(elev));
+    camera.lookAt(0, ty, 0);
+  }
+  const invalidate = () => { dirty = true; };
+  function tick(){
+    requestAnimationFrame(tick);
+    if(spin && !reduceMotion){ yaw = (yaw + 0.006) % (Math.PI*2); onYaw(deg()); dirty = true; }
+    if(!dirty || !renderer) return;
+    dirty = false;
+    root.rotation.y = yaw;
+    place();
+    renderer.render(scene, camera);
+  }
+  const deg = () => ((yaw*180/Math.PI) % 360 + 360) % 360;
+  function setDeg(d){ yaw = (d*Math.PI/180) % (Math.PI*2); onYaw(deg()); invalidate(); }
+  function nudge(dx, dy){
+    yaw += dx * 0.0085;
+    elev = clamp(elev + dy*0.004, -0.22, 0.42);
+    onYaw(deg()); invalidate();
+  }
+  function zoom(f){ zoomF = clamp(zoomF * f, 0.55, 2.3); invalidate(); }
+
+  return { mount, resize, rebuildBody, rebuildWear, setDeg, nudge, zoom, invalidate, deg,
+    get spin(){ return spin; }, set spin(v){ spin = v; invalidate(); },
+    set onYaw(fn){ onYaw = fn; }, get mounted(){ return mounted; },
+    clearSwatch(id){ swatchCache.delete(id); },
+    headSampler,
+    setScan(res){
+      if(SCAN && SCAN.geometry && res !== SCAN) SCAN.geometry.dispose();
+      SCAN = res;
+      if(scene){ rebuildBody(); rebuildWear(); }
+    },
+    get scan(){ return SCAN; },
+    hasScan(){ return !!SCAN; }
+  };
+})();
+</script>
+
+<script>
+/* ---------------------------- 5. INTERFACE ------------------------------- */
+
+const VIEWS = ["selfie","wardrobe","mirror","occasion"];
+function go(v){
+  State.view = v;
+  VIEWS.forEach(x => $("#v-" + x).classList.toggle("on", x === v));
+  $$("[data-go]").forEach(b => b.setAttribute("aria-current", String(b.dataset.go === v)));
+  if(v === "mirror"){
+    Figure.mount($("#stage"));
+    requestAnimationFrame(() => Figure.resize($("#stage")));
+  }
+  window.scrollTo(0, 0);
+}
+$$("[data-go]").forEach(b => b.addEventListener("click", () => go(b.dataset.go)));
+
+/* --------------------------- sheet plumbing ------------------------------ */
+let sheetClose = null;
+function openSheet(html, onMount){
+  const box = $("#sheetBox");
+  box.innerHTML = html;
+  $("#sheet").classList.add("on");
+  document.body.style.overflow = "hidden";
+  sheetClose = () => {};
+  if(onMount) onMount(box);
+  const first = box.querySelector("input,select,button");
+  if(first) first.focus({ preventScroll:true });
+}
+function closeSheet(){
+  $("#sheet").classList.remove("on");
+  $("#sheetBox").innerHTML = "";
+  document.body.style.overflow = "";
+  if(sheetClose) sheetClose();
+  sheetClose = null;
+}
+$("#sheet").addEventListener("click", e => { if(e.target.id === "sheet") closeSheet(); });
+document.addEventListener("keydown", e => { if(e.key === "Escape" && $("#sheet").classList.contains("on")) closeSheet(); });
+
+/* ------------------------------ photo input ------------------------------ */
+function pickFile(capture){
+  return new Promise(res => {
+    const inp = $("#filePick");
+    inp.value = "";
+    if(capture) inp.setAttribute("capture", capture); else inp.removeAttribute("capture");
+    let done = false;
+    const finish = f => { if(done) return; done = true; window.removeEventListener("focus", onFocus); res(f); };
+    const onFocus = () => setTimeout(() => { if(!inp.files.length) finish(null); }, 900);
+    inp.addEventListener("change", () => finish(inp.files[0] || null), { once:true });
+    window.addEventListener("focus", onFocus);
+    inp.click();
+  });
+}
+
+function cameraSheet(opts){
+  return new Promise(resolve => {
+    let stream = null, settled = false;
+    const finish = blob => {
+      if(settled) return; settled = true;
+      if(stream) stream.getTracks().forEach(t => t.stop());
+      closeSheet(); resolve(blob);
+    };
+    openSheet(`
+      <div class="sheethead">
+        <h3 id="sheetTitle">${esc(opts.title)}</h3>
+        <button class="btn ghost sm" id="camCancel">Close</button>
+      </div>
+      <div id="camHolder"></div>
+      <div class="row" style="gap:8px;flex-wrap:wrap">
+        <button class="btn pri grow" id="camShoot" disabled>Take the photo</button>
+        ${opts.timer ? '<button class="btn" id="camTimer" disabled>10-second timer</button>' : ""}
+        <button class="btn" id="camUpload">Choose a file</button>
+      </div>
+      <p class="mono" style="font-size:10.5px;color:var(--muted);margin:0">${esc(opts.hint)}</p>
+    `, box => {
+      sheetClose = () => { if(stream) stream.getTracks().forEach(t => t.stop()); if(!settled){ settled = true; resolve(null); } };
+      const holder = box.querySelector("#camHolder");
+      const shoot = box.querySelector("#camShoot");
+      box.querySelector("#camCancel").onclick = () => finish(null);
+      box.querySelector("#camUpload").onclick = async () => {
+        const f = await pickFile(opts.facing === "user" ? "user" : "environment");
+        if(f) finish(await fileToJpeg(f));
+      };
+      const fallback = msg => {
+        holder.innerHTML = `<div class="empty" style="padding:26px 18px"><h3>No camera here</h3><p style="margin:0">${esc(msg)}</p></div>`;
+        shoot.disabled = true;
+      };
+      if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
+        fallback("This browser won't hand over a camera. Choose a file instead — on a phone that opens the camera anyway.");
+        return;
+      }
+      navigator.mediaDevices.getUserMedia({
+        video: { facingMode: opts.facing, width:{ ideal:1440 }, height:{ ideal:1920 } }, audio:false
+      }).then(s => {
+        if(settled){ s.getTracks().forEach(t => t.stop()); return; }
+        stream = s;
+        holder.innerHTML = `<div class="camwrap"><video playsinline muted autoplay></video>
+          <svg class="camguide" viewBox="0 0 300 400" preserveAspectRatio="none">${opts.guide}</svg>
+          <div class="camhint">${esc(opts.hint)}</div></div>`;
+        const v = holder.querySelector("video");
+        v.srcObject = s; v.play().catch(()=>{});
+        const grab = async () => {
+          const c = document.createElement("canvas");
+          const w = v.videoWidth || 720, h = v.videoHeight || 960;
+          const sc = Math.min(1, 1280 / Math.max(w,h));
+          c.width = Math.round(w*sc); c.height = Math.round(h*sc);
+          c.getContext("2d").drawImage(v, 0, 0, c.width, c.height);
+          finish(await canvasToBlob(c));
+        };
+        shoot.disabled = false;
+        shoot.onclick = grab;
+        const timer = box.querySelector("#camTimer");
+        if(timer){
+          timer.disabled = false;
+          timer.onclick = () => {
+            timer.disabled = true; shoot.disabled = true;
+            let n = 10;
+            const hint = holder.querySelector(".camhint");
+            const tickDown = () => {
+              if(settled) return;
+              if(hint) hint.textContent = n > 0 ? "Get into position — " + n : "Hold still";
+              if(n-- <= 0){ grab(); return; }
+              setTimeout(tickDown, 1000);
+            };
+            tickDown();
+          };
+        }
+      }).catch(() => fallback("The camera was blocked or is in use. Choose a file instead — on a phone that opens the camera anyway."));
+    });
+  });
+}
+
+const FACE_GUIDE = '<ellipse cx="150" cy="165" rx="76" ry="100" fill="none" stroke="rgba(224,164,88,.85)" stroke-width="2" stroke-dasharray="7 6"/><path d="M150 265v70" stroke="rgba(224,164,88,.5)" stroke-width="2"/>';
+const FLAT_GUIDE = '<rect x="34" y="70" width="232" height="260" rx="10" fill="none" stroke="rgba(224,164,88,.85)" stroke-width="2" stroke-dasharray="8 7"/>';
+
+/* ------------------------------- selfie view ----------------------------- */
+async function renderAngles(){
+  const wrap = $("#angles");
+  wrap.innerHTML = "";
+  for(const a of ANGLES){
+    const ref = State.profile.selfies && State.profile.selfies[a.id];
+    const url = ref ? await Store.imageURL(ref) : null;
+    const card = document.createElement("div");
+    card.className = "angle" + (url ? " has" : "");
+    card.innerHTML = `
+      <div class="ph">${url ? `<img src="${url}" alt="${esc(a.label)} selfie">` :
+        `<svg class="glyph" viewBox="0 0 24 24"><use href="#i-selfie"/></svg>`}</div>
+      <div class="cap"><span class="nm">${esc(a.label)}</span><span class="deg mono">${a.deg}</span></div>
+      <div class="acts">
+        <button class="btn sm grow" data-shoot="${a.id}"><svg class="ico" viewBox="0 0 24 24"><use href="#i-cam"/></svg> ${url ? "Retake" : "Shoot"}</button>
+        ${url ? `<button class="btn sm ghost" data-clear="${a.id}" aria-label="Remove ${esc(a.label)} photo"><svg class="ico" viewBox="0 0 24 24"><use href="#i-trash"/></svg></button>` : ""}
+      </div>`;
+    wrap.appendChild(card);
+  }
+  wrap.querySelectorAll("[data-shoot]").forEach(b => b.onclick = () => shootAngle(b.dataset.shoot));
+  wrap.querySelectorAll("[data-clear]").forEach(b => b.onclick = async () => {
+    const id = b.dataset.clear;
+    await Store.dropImage(State.profile.selfies[id]);
+    delete State.profile.selfies[id];
+    await persistProfile(); renderAngles(); Figure.rebuildBody(); updateCounts();
+  });
+  const n = Object.keys(State.profile.selfies || {}).length;
+  const note = $("#selfieNotice");
+  note.innerHTML = n === 0
+    ? `<div class="notice"><svg class="ico" viewBox="0 0 24 24"><use href="#i-info"/></svg><div><b>No photos yet.</b> The mannequin wears a plain head until you shoot at least the front. Four angles give the smoothest turn.</div></div>`
+    : n < 4
+    ? `<div class="notice"><svg class="ico" viewBox="0 0 24 24"><use href="#i-info"/></svg><div><b>${n} of 4 angles.</b> Missing angles are blended from the ones you have, so the far side goes soft. Shoot the rest when you can.</div></div>`
+    : "";
+  updateCounts();
+}
+async function shootAngle(id){
+  const a = ANGLES.find(x => x.id === id);
+  const blob = await cameraSheet({ title:a.label + " — " + a.deg, hint:a.hint, facing:"user", guide:FACE_GUIDE });
+  if(!blob) return;
+  if(State.profile.selfies[id]) await Store.dropImage(State.profile.selfies[id]);
+  State.profile.selfies[id] = await Store.putImage(blob);
+  if(id === "front" && !State.profile.skinPicked) await sampleSkin();
+  await persistProfile();
+  renderAngles(); Figure.rebuildBody();
+  toast(a.label + " captured");
+}
+async function sampleSkin(){
+  const ref = State.profile.selfies && (State.profile.selfies.front || State.profile.selfies.left || State.profile.selfies.right);
+  if(!ref) return false;
+  const url = await Store.imageURL(ref);
+  if(!url) return false;
+  try{
+    const img = await loadImage(url);
+    State.profile.skin = averageColour(img, [0.36, 0.40, 0.28, 0.22]);
+    State.profile.skinPicked = true;
+    return true;
+  }catch(e){ return false; }
+}
+
+const BODY_FIELDS = [
+  { k:"heightCm",   label:"Height",         min:140, max:205, unit:"cm" },
+  { k:"shoulderCm", label:"Shoulder width", min:32,  max:58,  unit:"cm" },
+  { k:"waistCm",    label:"Waist",          min:55,  max:135, unit:"cm" },
+  { k:"hipCm",      label:"Hip",            min:65,  max:145, unit:"cm" }
+];
+function renderBodyControls(){
+  const host = $("#bodyControls");
+  host.innerHTML = BODY_FIELDS.map(f => `
+    <div class="field">
+      <span class="flabel">${f.label}</span>
+      <div class="scaleRow">
+        <input type="range" data-bk="${f.k}" min="${f.min}" max="${f.max}" step="1" value="${State.profile[f.k]}">
+        <span class="val mono" data-bv="${f.k}">${State.profile[f.k]} ${f.unit}</span>
+      </div>
+    </div>`).join("");
+  host.querySelectorAll("[data-bk]").forEach(r => {
+    r.addEventListener("input", () => {
+      const k = r.dataset.bk;
+      State.profile[k] = +r.value;
+      host.querySelector(`[data-bv="${k}"]`).textContent = r.value + " " + BODY_FIELDS.find(f => f.k === k).unit;
+      syncOther("t", k, r.value); queueBody();
+    });
+  });
+  $("#skinInput").value = State.profile.skin;
+  $("#skinHex").textContent = State.profile.skin.toUpperCase();
+}
+/* the same measurement appears in two panels — keep them reading alike */
+function syncOther(prefix, key, value){
+  const slider = document.querySelector("[data-" + prefix + "k=\"" + key + "\"]");
+  if(!slider) return;
+  slider.value = value;
+  const out = document.querySelector("[data-" + prefix + "v=\"" + key + "\"]");
+  if(!out) return;
+  if(prefix === "t"){
+    const f = TUNE.find(x => x.k === key);
+    if(f) out.textContent = f.fmt(+value);
+  } else {
+    const f = BODY_FIELDS.find(x => x.k === key);
+    if(f) out.textContent = value + " " + f.unit;
+  }
+}
+let bodyTimer = null;
+function queueBody(){
+  clearTimeout(bodyTimer);
+  bodyTimer = setTimeout(() => { Figure.rebuildBody(); Figure.rebuildWear(); persistProfile(); }, 180);
+}
+async function persistProfile(){ try{ await Store.saveProfile(State.profile); }catch(e){} }
+
+$("#skinInput").addEventListener("input", e => {
+  State.profile.skin = e.target.value; State.profile.skinPicked = true;
+  $("#skinHex").textContent = e.target.value.toUpperCase(); queueBody();
+});
+$("#skinFromPhoto").addEventListener("click", async () => {
+  const ok = await sampleSkin();
+  if(!ok){ toast("Shoot a front photo first"); return; }
+  $("#skinInput").value = State.profile.skin;
+  $("#skinHex").textContent = State.profile.skin.toUpperCase();
+  queueBody(); toast("Skin tone taken from your photo");
+});
+
+/* ------------------------------ wardrobe view ---------------------------- */
+function renderFilters(){
+  const host = $("#catFilter");
+  const all = [{ id:"all", label:"Everything" }].concat(CATS);
+  host.innerHTML = all.map(c =>
+    `<button class="chip" data-cat="${c.id}" aria-pressed="${State.filter === c.id}">${esc(c.label)}</button>`).join("");
+  host.querySelectorAll("[data-cat]").forEach(b => b.onclick = () => { State.filter = b.dataset.cat; renderFilters(); renderWardrobe(); });
+}
+$("#search").addEventListener("input", e => { State.query = e.target.value.toLowerCase(); renderWardrobe(); });
+
+function visibleItems(){
+  return State.items.filter(i => {
+    if(State.filter !== "all" && i.cat !== State.filter) return false;
+    if(!State.query) return true;
+    return [i.name, i.sub, i.colourName, i.fabric, i.brand].join(" ").toLowerCase().includes(State.query);
+  }).sort((a,b) => (b.added||0) - (a.added||0) || a.name.localeCompare(b.name));
+}
+async function renderWardrobe(){
+  const grid = $("#wardrobeGrid");
+  const list = visibleItems();
+  if(!list.length){
+    grid.innerHTML = `<div class="empty" style="grid-column:1/-1"><h3>Nothing here yet</h3>
+      <p style="margin:0">Photograph a garment on a plain floor or bed. Front on, whole piece in frame.</p></div>`;
+    updateCounts(); return;
+  }
+  grid.innerHTML = list.map(i => `
+    <button class="tag" data-item="${i.id}" aria-pressed="${isWorn(i.id)}">
+      <div class="sw"><span class="hole"></span>
+        ${i.timesWorn ? `<span class="worn mono">${i.timesWorn}×</span>` : ""}
+        <img data-src="${esc(i.photo || "")}" alt="">
+      </div>
+      <div class="body">
+        <span class="nm">${esc(i.name)}</span>
+        <span class="spec"><i class="swatchdot" style="background:${esc(i.colour)}"></i>${esc(i.sub)} · F${i.formality} · W${i.warmth}</span>
+      </div>
+      ${isWorn(i.id) ? '<span class="onbody"></span>' : ""}
+    </button>`).join("");
+  grid.querySelectorAll("[data-item]").forEach(b => b.onclick = () => itemSheet(itemById(b.dataset.item)));
+  for(const img of grid.querySelectorAll("img[data-src]")){
+    const u = await Store.imageURL(img.dataset.src);
+    if(u) img.src = u;
+  }
+  updateCounts();
+}
+function renderSampleNotice(){
+  $("#sampleNotice").innerHTML = State.usingSamples
+    ? `<div class="notice"><svg class="ico" viewBox="0 0 24 24"><use href="#i-info"/></svg>
+        <div><b>These are examples.</b> Sixteen stand-in garments so the mirror and the occasion picker have something to work with. They disappear the moment you add a real one.
+        <button class="btn sm ghost" id="clearSamples" style="margin-top:6px">Clear the examples</button></div></div>`
+    : "";
+  const b = $("#clearSamples");
+  if(b) b.onclick = () => { State.items = []; State.outfit = {}; State.usingSamples = false;
+    renderSampleNotice(); renderWardrobe(); renderWearing(); Figure.rebuildWear(); };
+}
+
+/* -------------------------- item editor / capture ------------------------ */
+let sampleCap = null;      /* resolved Claude sampling, if this viewer has it */
+async function addItemFlow(){
+  const blob = await cameraSheet({
+    title:"Photograph the garment", facing:"environment", guide:FLAT_GUIDE,
+    hint:"Lay it flat on a plain surface. Whole piece in frame, even light."
+  });
+  if(!blob) return;
+  const draft = {
+    id: uid(), name:"", cat:"top", sub:"T-shirt", colour:"#8A8A8A", colourName:"grey",
+    fabric:"", brand:"", formality:1, warmth:1, notes:"", timesWorn:0, lastWorn:0,
+    added: Date.now(), _blob: blob
+  };
+  try{
+    const url = URL.createObjectURL(blob);
+    const img = await loadImage(url);
+    draft.colour = averageColour(img, [0.28,0.28,0.44,0.44]);
+    draft.colourName = colourName(draft.colour);
+    URL.revokeObjectURL(url);
+  }catch(e){}
+  itemSheet(draft, true);
+}
+
+function itemSheet(item, isNew){
+  if(!item) return;
+  const cats = CATS.map(c => `<option value="${c.id}"${c.id === item.cat ? " selected" : ""}>${esc(c.one)}</option>`).join("");
+  openSheet(`
+    <div class="sheethead">
+      <h3 id="sheetTitle">${isNew ? "New garment" : esc(item.name || "Garment")}</h3>
+      <button class="btn ghost sm" id="itClose">Close</button>
+    </div>
+    <img class="previewimg" id="itPhoto" alt="">
+    <div id="autoRow"></div>
+    <div class="field"><label for="itName">Name</label>
+      <input type="text" id="itName" value="${esc(item.name)}" placeholder="Navy wool blazer"></div>
+    <div class="f2">
+      <div class="field"><label for="itCat">Category</label><select id="itCat">${cats}</select></div>
+      <div class="field"><label for="itSub">Type</label><select id="itSub"></select></div>
+    </div>
+    <div class="f2">
+      <div class="field"><label for="itColour">Colour</label>
+        <div class="row"><input type="color" id="itColour" value="${esc(item.colour)}" style="width:44px;height:34px;padding:2px;border:1px solid var(--line);border-radius:7px;background:var(--bg)">
+        <span class="mono" id="itColourName" style="font-size:11.5px;color:var(--muted)">${esc(item.colourName)}</span></div></div>
+      <div class="field"><label for="itFabric">Fabric</label>
+        <input type="text" id="itFabric" value="${esc(item.fabric)}" placeholder="wool, linen, denim…"></div>
+    </div>
+    <div class="field"><span class="flabel">Formality</span>
+      <div class="scaleRow"><input type="range" id="itForm" min="1" max="5" step="1" value="${item.formality}">
+      <span class="val mono" id="itFormV"></span></div></div>
+    <div class="field"><span class="flabel">Warmth</span>
+      <div class="scaleRow"><input type="range" id="itWarm" min="1" max="5" step="1" value="${item.warmth}">
+      <span class="val mono" id="itWarmV"></span></div></div>
+    <div class="field"><label for="itNotes">Notes</label>
+      <textarea id="itNotes" placeholder="Needs a press. Runs small.">${esc(item.notes)}</textarea></div>
+    <div class="row" style="gap:8px;flex-wrap:wrap">
+      <button class="btn pri grow" id="itSave">${isNew ? "Add to wardrobe" : "Save"}</button>
+      ${isNew ? "" : `<button class="btn" id="itWear">${isWorn(item.id) ? "Take off" : "Put it on"}</button>
+                      <button class="btn danger" id="itDel" aria-label="Delete"><svg class="ico" viewBox="0 0 24 24"><use href="#i-trash"/></svg></button>`}
+    </div>
+  `, box => {
+    const FORM_WORDS = ["","Knockabout","Casual","Smart casual","Business","Formal"];
+    const WARM_WORDS = ["","Hot weather","Mild","Cool","Cold","Deep winter"];
+    const subSel = box.querySelector("#itSub");
+    const fillSubs = () => {
+      const cat = box.querySelector("#itCat").value;
+      subSel.innerHTML = (SUBTYPES[cat] || []).map(([n]) =>
+        `<option value="${esc(n)}"${n === item.sub ? " selected" : ""}>${esc(n)}</option>`).join("");
+      if(!subSel.value && subSel.options.length) subSel.selectedIndex = 0;
+    };
+    fillSubs();
+    const showScales = () => {
+      box.querySelector("#itFormV").textContent = box.querySelector("#itForm").value + " " + FORM_WORDS[+box.querySelector("#itForm").value];
+      box.querySelector("#itWarmV").textContent = box.querySelector("#itWarm").value + " " + WARM_WORDS[+box.querySelector("#itWarm").value];
+    };
+    showScales();
+    box.querySelector("#itForm").oninput = showScales;
+    box.querySelector("#itWarm").oninput = showScales;
+    box.querySelector("#itCat").onchange = () => {
+      item.sub = ""; fillSubs();
+      const inf = subtypeInfo(box.querySelector("#itCat").value, subSel.value);
+      box.querySelector("#itForm").value = inf.f; box.querySelector("#itWarm").value = Math.max(1, inf.w || 1);
+      showScales();
+    };
+    subSel.onchange = () => {
+      const inf = subtypeInfo(box.querySelector("#itCat").value, subSel.value);
+      box.querySelector("#itForm").value = inf.f; box.querySelector("#itWarm").value = Math.max(1, inf.w || 1);
+      showScales();
+      if(!box.querySelector("#itName").value) box.querySelector("#itName").value = item.colourName + " " + subSel.value.toLowerCase();
+    };
+    box.querySelector("#itColour").oninput = e => {
+      item.colourName = colourName(e.target.value);
+      box.querySelector("#itColourName").textContent = item.colourName;
+    };
+    box.querySelector("#itClose").onclick = closeSheet;
+
+    const img = box.querySelector("#itPhoto");
+    if(item._blob) img.src = URL.createObjectURL(item._blob);
+    else Store.imageURL(item.photo).then(u => { if(u) img.src = u; });
+
+    /* optional: let the viewer's own Claude read the photo and fill the form */
+    if(sampleCap && item._blob){
+      const row = box.querySelector("#autoRow");
+      row.innerHTML = `<button class="btn sm" id="autoTag">Identify this with Claude</button>
+        <span class="mono" id="autoMsg" style="font-size:11px;color:var(--muted);margin-left:8px"></span>`;
+      row.querySelector("#autoTag").onclick = async () => {
+        const btn = row.querySelector("#autoTag"), msg = row.querySelector("#autoMsg");
+        btn.disabled = true; msg.textContent = "Looking…";
+        try{
+          const names = Object.entries(SUBTYPES).map(([c,l]) => c + ": " + l.map(x => x[0]).join(", ")).join("\n");
+          const data = await sampleCap.json(
+            "You are cataloguing one garment for a wardrobe app. The image shows a single item of clothing or an accessory.\n" +
+            "Reply with only a JSON object: {\"name\":string,\"cat\":string,\"sub\":string,\"fabric\":string,\"formality\":1-5,\"warmth\":1-5}\n" +
+            "Example: {\"name\":\"navy wool blazer\",\"cat\":\"outerwear\",\"sub\":\"Blazer\",\"fabric\":\"wool\",\"formality\":5,\"warmth\":3}\n" +
+            "cat must be one of: top, bottom, dress, outerwear, shoes, headwear, bag, accessory.\n" +
+            "sub must be copied exactly from the list for that category:\n" + names + "\n" +
+            "formality: 1 knockabout, 3 smart casual, 5 formal. warmth: 1 hot weather, 5 deep winter.\n" +
+            "name: three or four plain words, no brand guesses.",
+            { images: item._blob, modelTier:"quick" });
+          if(data && data.cat && SUBTYPES[data.cat]){
+            box.querySelector("#itCat").value = data.cat;
+            item.sub = data.sub; fillSubs();
+            if(data.name) box.querySelector("#itName").value = String(data.name);
+            if(data.fabric) box.querySelector("#itFabric").value = String(data.fabric);
+            if(data.formality) box.querySelector("#itForm").value = clamp(+data.formality,1,5);
+            if(data.warmth) box.querySelector("#itWarm").value = clamp(+data.warmth,1,5);
+            showScales(); msg.textContent = "Filled in — check it over.";
+          } else { msg.textContent = "Couldn't read that one."; }
+        }catch(e){
+          msg.textContent = e && e.code === "not_granted" ? "Not allowed on this account." : "Didn't work. Fill it in by hand.";
+        }
+        btn.disabled = false;
+      };
+    }
+
+    box.querySelector("#itSave").onclick = async () => {
+      const rec = {
+        id:item.id,
+        name: box.querySelector("#itName").value.trim() || (item.colourName + " " + subSel.value.toLowerCase()),
+        cat: box.querySelector("#itCat").value, sub: subSel.value,
+        colour: box.querySelector("#itColour").value,
+        colourName: colourName(box.querySelector("#itColour").value),
+        fabric: box.querySelector("#itFabric").value.trim(),
+        brand: item.brand || "",
+        formality: +box.querySelector("#itForm").value,
+        warmth: +box.querySelector("#itWarm").value,
+        notes: box.querySelector("#itNotes").value.trim(),
+        timesWorn: item.timesWorn || 0, lastWorn: item.lastWorn || 0,
+        added: item.added || Date.now(),
+        photo: item.photo || null
+      };
+      const btn = box.querySelector("#itSave");
+      btn.disabled = true; btn.textContent = "Saving…";
+      try{
+        if(item._blob) rec.photo = await Store.putImage(item._blob);
+        if(State.usingSamples){ State.items = []; State.usingSamples = false; State.outfit = {}; renderSampleNotice(); }
+        const ix = State.items.findIndex(i => i.id === rec.id);
+        if(ix >= 0) State.items[ix] = rec; else State.items.push(rec);
+        await Store.saveItem(rec);
+        Figure.clearSwatch(rec.id);
+        closeSheet();
+        renderWardrobe(); renderWearing(); Figure.rebuildWear();
+        toast(isNew ? "Added to the wardrobe" : "Saved");
+      }catch(e){
+        btn.disabled = false; btn.textContent = "Try again";
+        toast("Couldn't save that. " + (Store.mode === "none" ? "This browser is blocking storage." : "Try once more."));
+      }
+    };
+    const wearBtn = box.querySelector("#itWear");
+    if(wearBtn) wearBtn.onclick = () => { toggleWear(item); closeSheet(); };
+    const delBtn = box.querySelector("#itDel");
+    if(delBtn) delBtn.onclick = async () => {
+      if(delBtn.dataset.armed !== "1"){
+        delBtn.dataset.armed = "1";
+        delBtn.innerHTML = "Remove for good?";
+        setTimeout(() => { if(delBtn.isConnected){ delBtn.dataset.armed = "0";
+          delBtn.innerHTML = '<svg class="ico" viewBox="0 0 24 24"><use href="#i-trash"/></svg>'; } }, 4000);
+        return;
+      }
+      await Store.dropImage(item.photo);
+      await Store.removeItem(item.id);
+      State.items = State.items.filter(i => i.id !== item.id);
+      for(const k in State.outfit){
+        if(Array.isArray(State.outfit[k])) State.outfit[k] = State.outfit[k].filter(x => x !== item.id);
+        else if(State.outfit[k] === item.id) delete State.outfit[k];
+      }
+      closeSheet(); renderWardrobe(); renderWearing(); Figure.rebuildWear(); toast("Removed");
+    };
+  });
+}
+$("#addItemBtn").addEventListener("click", addItemFlow);
+
+/* -------------------------------- dressing ------------------------------- */
+function slotOf(item){ return CAT_BY_ID[item.cat] ? CAT_BY_ID[item.cat].slot : "accessory"; }
+function toggleWear(item){
+  const slot = slotOf(item);
+  if(slot === "accessory"){
+    const list = State.outfit.accessory || [];
+    State.outfit.accessory = list.includes(item.id) ? list.filter(x => x !== item.id) : list.concat(item.id);
+  } else {
+    State.outfit[slot] = State.outfit[slot] === item.id ? null : item.id;
+    if(slot === "dress" && State.outfit[slot]){ State.outfit.top = null; State.outfit.bottom = null; }
+    if((slot === "top" || slot === "bottom") && State.outfit[slot]) State.outfit.dress = null;
+  }
+  renderWearing(); renderWardrobe(); Figure.rebuildWear();
+}
+async function renderWearing(){
+  const host = $("#wearing");
+  const ids = wornIds();
+  if(!ids.length){
+    host.innerHTML = `<span class="mono" style="font-size:11px;color:var(--muted)">Nothing on. Tap Dress.</span>`;
+    updateCounts(); return;
+  }
+  host.innerHTML = ids.map(id => {
+    const it = itemById(id); if(!it) return "";
+    return `<span class="wchip"><img data-src="${esc(it.photo||"")}" alt="">${esc(it.name)}
+      <button class="x" data-off="${id}" aria-label="Take off ${esc(it.name)}">×</button></span>`;
+  }).join("");
+  host.querySelectorAll("[data-off]").forEach(b => b.onclick = () => toggleWear(itemById(b.dataset.off)));
+  for(const img of host.querySelectorAll("img[data-src]")){
+    const u = await Store.imageURL(img.dataset.src); if(u) img.src = u;
+  }
+  updateCounts();
+}
+function dressSheet(){
+  const groups = CATS.map(c => {
+    const list = State.items.filter(i => i.cat === c.id);
+    if(!list.length) return "";
+    return `<div class="field"><span class="flabel">${esc(c.label)}</span>
+      <div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:9px">
+      ${list.map(i => `<button class="tag" data-pick="${i.id}" aria-pressed="${isWorn(i.id)}">
+        <div class="sw"><img data-src="${esc(i.photo||"")}" alt=""></div>
+        <div class="body"><span class="nm" style="font-size:12px">${esc(i.name)}</span></div>
+        ${isWorn(i.id) ? '<span class="onbody"></span>' : ""}</button>`).join("")}
+      </div></div>`;
+  }).join("");
+  openSheet(`
+    <div class="sheethead"><h3 id="sheetTitle">Dress</h3>
+      <button class="btn ghost sm" id="dsClose">Done</button></div>
+    ${groups || '<div class="empty"><h3>Empty wardrobe</h3><p style="margin:0">Add a garment first.</p></div>'}
+  `, box => {
+    box.querySelector("#dsClose").onclick = closeSheet;
+    box.querySelectorAll("[data-pick]").forEach(b => b.onclick = () => {
+      toggleWear(itemById(b.dataset.pick));
+      b.setAttribute("aria-pressed", String(isWorn(b.dataset.pick)));
+      const bar = b.querySelector(".onbody");
+      if(isWorn(b.dataset.pick)){ if(!bar){ const s = document.createElement("span"); s.className = "onbody"; b.appendChild(s); } }
+      else if(bar) bar.remove();
+    });
+    box.querySelectorAll("img[data-src]").forEach(async img => {
+      const u = await Store.imageURL(img.dataset.src); if(u) img.src = u;
+    });
+  });
+}
+$("#dressBtn").addEventListener("click", dressSheet);
+$("#undressBtn").addEventListener("click", () => {
+  State.outfit = {}; renderWearing(); renderWardrobe(); Figure.rebuildWear();
+});
+</script>
+
+<script>
+/* ---------------------- BODY SCAN: capture and build --------------------- */
+
+const BODY_ANGLES = [
+  { id:"front", label:"Front",      deg:"0°",   hint:"Face the camera. Arms a hand's width clear of your sides, feet apart." },
+  { id:"right", label:"Right side", deg:"90°",  hint:"Turn a quarter to your left. Same spot, same stance." },
+  { id:"back",  label:"Back",       deg:"180°", hint:"Another quarter turn. Back to the camera." },
+  { id:"left",  label:"Left side",  deg:"270°", hint:"One more quarter. Left side to the camera." }
+];
+const BODY_GUIDE =
+  '<rect x="96" y="14" width="108" height="372" rx="52" fill="none" stroke="rgba(224,164,88,.55)" stroke-width="2" stroke-dasharray="9 8"/>' +
+  '<circle cx="150" cy="52" r="26" fill="none" stroke="rgba(224,164,88,.8)" stroke-width="2"/>' +
+  '<path d="M40 380h220" stroke="rgba(224,164,88,.8)" stroke-width="2"/>' +
+  '<path d="M40 20h220" stroke="rgba(224,164,88,.35)" stroke-width="2"/>';
+
+let scanPreviews = {}, scanBusy = false, scanError = "";
+
+function scanCfg(){
+  if(!State.profile.scan) State.profile.scan = { plate:null, shots:{}, sensitivity:0.5, started:false };
+  if(!State.profile.scan.shots) State.profile.scan.shots = {};
+  return State.profile.scan;
+}
+const scanShotCount = () => Object.keys(scanCfg().shots).length;
+
+function renderScanCard(){
+  const host = $("#scanCard");
+  if(!host) return;
+  const cfg = scanCfg();
+  const built = Figure.hasScan();
+  const meas = built ? Figure.scan.info.meas : null;
+  const on = built && State.profile.useScan !== false;
+
+  if(!cfg.started && !built){
+    host.innerHTML = `
+      <div class="card">
+        <div class="row" style="justify-content:space-between;align-items:flex-start;gap:14px;flex-wrap:wrap">
+          <div><h3>Body scan</h3>
+          <p style="color:var(--muted);font-size:13.5px;margin:3px 0 0;max-width:56ch">
+          Five photographs turn into a 3D body. The app cuts you out of each frame and
+          carves the volume that fits all four outlines at once, so the figure has your
+          width, your depth and your posture instead of a slider's guess.</p></div>
+          <button class="btn pri" id="scanStart">Start a body scan</button>
+        </div>
+        <ol class="mono" style="margin:14px 0 0;padding-left:20px;font-size:11.5px;color:var(--muted);line-height:1.9">
+          <li>PROP THE PHONE AT HIP HEIGHT, THREE PACES BACK, PLAIN WALL BEHIND YOU</li>
+          <li>SHOOT THE EMPTY ROOM ONCE, THEN DO NOT MOVE THE PHONE</li>
+          <li>STEP IN AND SHOOT FOUR QUARTER TURNS ON THE SAME SPOT</li>
+          <li>WEAR SOMETHING CLOSE-FITTING SO THE OUTLINE IS YOURS, NOT THE COAT'S</li>
+        </ol>
+      </div>`;
+    $("#scanStart").onclick = () => { cfg.started = true; persistProfile(); renderScanCard(); };
+    return;
+  }
+
+  const plateURL = cfg.plate ? "pending" : null;
+  host.innerHTML = `
+    <div class="card">
+      <div class="row" style="justify-content:space-between;align-items:flex-start;gap:14px;flex-wrap:wrap">
+        <div><h3>Body scan</h3>
+          <p style="color:var(--muted);font-size:13.5px;margin:3px 0 0;max-width:56ch">
+          ${built ? "Your scan is built. The mirror is using " + (on ? "it" : "the mannequin") + "."
+                  : "Shoot the empty room first, then four quarter turns from the same spot."}</p></div>
+        ${built ? `<div class="chips">
+          <button class="chip" data-src="scan" aria-pressed="${on}">Use the scan</button>
+          <button class="chip" data-src="mannequin" aria-pressed="${!on}">Use the mannequin</button>
+        </div>` : ""}
+      </div>
+
+      ${meas ? `<div class="measgrid">
+        ${[["Height", meas.heightCm],["Chest", meas.chestCm],["Waist", meas.waistCm],
+           ["Hip", meas.hipCm],["Shoulder", meas.shoulderCm],["Inseam", meas.inseamCm]]
+          .map(([k,v]) => `<div class="meas"><span class="k">${k}</span><span class="v mono">${v}<i>cm</i></span></div>`).join("")}
+      </div>
+      <p class="mono" style="font-size:10.5px;color:var(--muted);margin:9px 0 0">
+        GIRTHS ARE ELLIPSE ESTIMATES FROM THE HULL — GOOD FOR SIZING, NOT FOR A TAILOR'S CHALK.
+        <button class="btn ghost sm" id="scanToMannequin" style="margin-left:6px">Copy into the mannequin</button>
+      </p>` : ""}
+
+      <div class="angles scanrow">
+        <div class="angle ${cfg.plate ? "has" : ""}">
+          <div class="ph" id="platePh">${cfg.plate ? "" : '<svg class="glyph" viewBox="0 0 24 24"><use href="#i-home"/></svg>'}</div>
+          <div class="cap"><span class="nm">Empty room</span><span class="deg mono">PLATE</span></div>
+          <div class="acts"><button class="btn sm grow" id="shootPlate">${cfg.plate ? "Reshoot" : "Shoot"}</button></div>
+        </div>
+        ${BODY_ANGLES.map(a => {
+          const have = !!cfg.shots[a.id];
+          return `<div class="angle ${have ? "has" : ""}">
+            <div class="ph" data-ph="${a.id}">${have ? "" : '<svg class="glyph" viewBox="0 0 24 24"><use href="#i-selfie"/></svg>'}</div>
+            <div class="cap"><span class="nm">${a.label}</span><span class="deg mono">${a.deg}</span></div>
+            <div class="acts"><button class="btn sm grow" data-bshoot="${a.id}">${have ? "Retake" : "Shoot"}</button></div>
+          </div>`;
+        }).join("")}
+      </div>
+
+      <div class="field" style="margin-top:14px;max-width:340px">
+        <span class="flabel">Cut-out sensitivity</span>
+        <div class="scaleRow">
+          <input type="range" id="scanSens" min="0" max="1" step="0.02" value="${cfg.sensitivity}">
+          <span class="val mono" id="scanSensV">${Math.round(cfg.sensitivity*100)}%</span>
+        </div>
+      </div>
+      ${cfg.plate ? "" : `<p class="mono" style="font-size:10.5px;color:var(--accent);margin:8px 0 0">
+        NO EMPTY-ROOM PLATE — THE CUT-OUT FALLS BACK TO EDGE MATTING AND NEEDS A PLAIN WALL.</p>`}
+      ${scanError ? `<div class="notice" style="margin:14px 0 0;background:var(--bad-soft);border-color:var(--bad)">
+        <svg class="ico" viewBox="0 0 24 24" style="color:var(--bad)"><use href="#i-info"/></svg><div>${esc(scanError)}</div></div>` : ""}
+      <div class="row" style="margin-top:14px;gap:8px;flex-wrap:wrap">
+        <button class="btn pri" id="scanBuild" ${scanBusy || scanShotCount() < 2 ? "disabled" : ""}>
+          ${built ? "Rebuild the scan" : "Build the scan"}</button>
+        <span class="mono" id="scanProgress" style="font-size:11px;color:var(--muted)"></span>
+        ${built || scanShotCount() ? '<button class="btn ghost sm" id="scanReset" style="margin-left:auto">Discard the scan</button>' : ""}
+      </div>
+    </div>`;
+  void plateURL;
+
+  /* thumbnails: the cut-out where we have one, else the raw frame */
+  const fill = async (el, ref, key) => {
+    if(!el || !ref) return;
+    const src = scanPreviews[key] || await Store.imageURL(ref);
+    if(src) el.innerHTML = `<img src="${src}" alt="">`;
+  };
+  fill($("#platePh"), cfg.plate, "plate");
+  BODY_ANGLES.forEach(a => fill(host.querySelector(`[data-ph="${a.id}"]`), cfg.shots[a.id], a.id));
+
+  $("#shootPlate").onclick = async () => {
+    const blob = await cameraSheet({
+      title:"The empty room", facing:"environment", timer:true, guide:BODY_GUIDE,
+      hint:"Frame the space you will stand in, head to floor. Then leave the phone exactly where it is."
+    });
+    if(!blob) return;
+    if(cfg.plate) await Store.dropImage(cfg.plate);
+    cfg.plate = await Store.putImage(blob);
+    delete scanPreviews.plate;
+    await persistProfile(); refreshPreviews(); renderScanCard();
+  };
+  host.querySelectorAll("[data-bshoot]").forEach(b => b.onclick = async () => {
+    const a = BODY_ANGLES.find(x => x.id === b.dataset.bshoot);
+    const blob = await cameraSheet({
+      title:a.label + " — " + a.deg, facing:"environment", timer:true, guide:BODY_GUIDE, hint:a.hint });
+    if(!blob) return;
+    if(cfg.shots[a.id]) await Store.dropImage(cfg.shots[a.id]);
+    cfg.shots[a.id] = await Store.putImage(blob);
+    delete scanPreviews[a.id];
+    await persistProfile(); refreshPreviews(); renderScanCard();
+  });
+  const sens = $("#scanSens");
+  sens.oninput = () => { $("#scanSensV").textContent = Math.round(sens.value*100) + "%"; };
+  sens.onchange = () => { cfg.sensitivity = +sens.value; persistProfile(); refreshPreviews(); };
+  $("#scanBuild").onclick = buildScan;
+  const reset = $("#scanReset");
+  if(reset) reset.onclick = discardScan;
+  host.querySelectorAll("[data-src]").forEach(b => b.onclick = () => {
+    State.profile.useScan = b.dataset.src === "scan";
+    persistProfile(); Figure.rebuildBody(); Figure.rebuildWear(); renderScanCard(); updateCounts();
+  });
+  const copy = $("#scanToMannequin");
+  if(copy) copy.onclick = () => {
+    const m = Figure.scan.info.meas;
+    State.profile.heightCm = clamp(m.heightCm, 140, 205);
+    State.profile.shoulderCm = clamp(m.shoulderCm, 32, 58);
+    State.profile.waistCm = clamp(m.waistCm, 55, 135);
+    State.profile.hipCm = clamp(m.hipCm, 65, 145);
+    persistProfile(); renderBodyControls(); renderTune();
+    toast("Measurements copied to the mannequin");
+  };
+}
+
+/* cut-outs for the capture cards, so bad mattes are visible before building */
+let previewJob = 0;
+async function refreshPreviews(){
+  const cfg = scanCfg(), job = ++previewJob;
+  for(const a of BODY_ANGLES){
+    if(!cfg.shots[a.id]) continue;
+    try{
+      const url = await Scan.previewOne(cfg.shots[a.id], cfg.plate, cfg.sensitivity);
+      if(job !== previewJob) return;
+      if(url){
+        scanPreviews[a.id] = url;
+        const el = document.querySelector(`[data-ph="${a.id}"]`);
+        if(el) el.innerHTML = `<img src="${url}" alt="Cut-out of the ${a.label} frame">`;
+      }
+    }catch(e){}
+  }
+}
+
+async function buildScan(){
+  const cfg = scanCfg();
+  scanBusy = true; scanError = "";
+  const btn = $("#scanBuild"), prog = $("#scanProgress");
+  if(btn) btn.disabled = true;
+  const say = m => { if(prog) prog.textContent = m.toUpperCase(); };
+  try{
+    const headTex = await Figure.headSampler(State.profile);
+    const res = await Scan.build({
+      plate: cfg.plate, shots: cfg.shots, sensitivity: cfg.sensitivity,
+      heightCm: State.profile.heightCm, headTex
+    }, say);
+    scanBusy = false;
+    if(!res.ok){ scanError = res.error; renderScanCard(); return; }
+    Figure.setScan(res);
+    State.profile.useScan = true;
+    Object.assign(scanPreviews, res.previews || {});
+    await persistProfile();
+    say("");
+    renderScanCard(); updateCounts();
+    toast("Scan built from " + res.vertices.toLocaleString() + " points");
+    go("mirror");
+  }catch(e){
+    scanBusy = false;
+    scanError = "The scan could not be built here. " + (e && e.message ? e.message : "");
+    renderScanCard();
+  }
+}
+async function discardScan(){
+  const cfg = scanCfg();
+  for(const k of Object.keys(cfg.shots)) await Store.dropImage(cfg.shots[k]);
+  if(cfg.plate) await Store.dropImage(cfg.plate);
+  State.profile.scan = { plate:null, shots:{}, sensitivity:0.5, started:false };
+  State.profile.useScan = false;
+  scanPreviews = {}; scanError = "";
+  Figure.setScan(null);
+  await persistProfile();
+  renderScanCard(); renderTune(); updateCounts();
+}
+/* rebuilt from the stored photographs on every load — the mesh itself is not kept */
+async function restoreScan(){
+  const cfg = State.profile.scan;
+  if(!cfg || !cfg.shots || Object.keys(cfg.shots).length < 2) return;
+  const host = $("#scanCard");
+  if(host) host.innerHTML = `<div class="card"><h3>Body scan</h3>
+    <p class="mono" style="font-size:11px;color:var(--muted);margin:8px 0 0">REBUILDING FROM YOUR PHOTOGRAPHS…</p></div>`;
+  try{
+    const headTex = await Figure.headSampler(State.profile);
+    const res = await Scan.build({
+      plate: cfg.plate, shots: cfg.shots, sensitivity: cfg.sensitivity,
+      heightCm: State.profile.heightCm, headTex
+    }, () => {});
+    if(res.ok){
+      Figure.setScan(res);
+      Object.assign(scanPreviews, res.previews || {});
+    } else { scanError = res.error; }
+  }catch(e){ scanError = "The stored scan could not be rebuilt."; }
+  renderScanCard(); renderTune(); updateCounts();
+}
+</script>
+
+<script>
+/* --------------------------- mirror interaction -------------------------- */
+const stage = $("#stage");
+let dragging = false, lastX = 0, lastY = 0, pid = null;
+stage.addEventListener("pointerdown", e => {
+  if(e.target.closest(".stagetools")) return;
+  dragging = true; pid = e.pointerId; lastX = e.clientX; lastY = e.clientY;
+  stage.classList.add("drag"); stage.setPointerCapture(pid);
+});
+stage.addEventListener("pointermove", e => {
+  if(!dragging || e.pointerId !== pid) return;
+  const dx = e.clientX - lastX, dy = e.clientY - lastY;
+  lastX = e.clientX; lastY = e.clientY;
+  Figure.nudge(stage.classList.contains("mirrored") ? -dx : dx, dy);
+});
+const endDrag = e => {
+  if(!dragging) return;
+  dragging = false; stage.classList.remove("drag");
+  try{ stage.releasePointerCapture(pid); }catch(err){}
+};
+stage.addEventListener("pointerup", endDrag);
+stage.addEventListener("pointercancel", endDrag);
+stage.addEventListener("wheel", e => { e.preventDefault(); Figure.zoom(e.deltaY > 0 ? 1.06 : 0.94); }, { passive:false });
+
+let pinchStart = 0;
+stage.addEventListener("touchstart", e => {
+  if(e.touches.length === 2) pinchStart = Math.hypot(
+    e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
+}, { passive:true });
+stage.addEventListener("touchmove", e => {
+  if(e.touches.length !== 2 || !pinchStart) return;
+  const d = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
+  Figure.zoom(pinchStart / d); pinchStart = d;
+}, { passive:true });
+
+/* the turntable ruler — real degrees, anchored to the four faces */
+const RULER_ANCHORS = { 0:"FRONT", 90:"RIGHT", 180:"BACK", 270:"LEFT" };
+(function buildRuler(){
+  const t = $("#rtrack");
+  let h = "";
+  for(let d = 0; d < 360; d += 5){
+    const maj = d % 45 === 0;
+    h += `<i class="rtick${maj ? " maj" : ""}" style="left:${d/360*100}%;height:${maj ? 15 : 7}px"></i>`;
+    if(d % 45 === 0){
+      const lab = RULER_ANCHORS[d] || (d + "°");
+      h += `<span class="rlab" style="left:${d/360*100}%">${lab}</span>`;
+    }
+  }
+  t.innerHTML = h;
+})();
+function paintRuler(d){
+  const pct = d/360*100;
+  $("#rhead").style.left = pct + "%";
+  const read = $("#rread");
+  read.style.left = clamp(pct, 6, 94) + "%";
+  const near = Object.keys(RULER_ANCHORS).find(k => Math.abs(((d - +k + 540) % 360) - 180) < 8);
+  read.textContent = Math.round(d) + "°" + (near !== undefined ? " " + RULER_ANCHORS[near] : "");
+  const r = $("#ruler");
+  r.setAttribute("aria-valuenow", Math.round(d));
+  r.setAttribute("aria-valuetext", Math.round(d) + " degrees" + (near !== undefined ? ", " + RULER_ANCHORS[near].toLowerCase() : ""));
+}
+Figure.onYaw = paintRuler;
+const ruler = $("#ruler");
+function rulerFromEvent(e){
+  const r = ruler.getBoundingClientRect();
+  Figure.setDeg(clamp((e.clientX - r.left)/r.width, 0, .9999) * 360);
+}
+let rDrag = false;
+ruler.addEventListener("pointerdown", e => { rDrag = true; ruler.setPointerCapture(e.pointerId); rulerFromEvent(e); });
+ruler.addEventListener("pointermove", e => { if(rDrag) rulerFromEvent(e); });
+ruler.addEventListener("pointerup", e => { rDrag = false; try{ ruler.releasePointerCapture(e.pointerId); }catch(err){} });
+ruler.addEventListener("keydown", e => {
+  const step = e.shiftKey ? 45 : 5;
+  if(e.key === "ArrowRight"){ Figure.setDeg((Figure.deg() + step) % 360); e.preventDefault(); }
+  if(e.key === "ArrowLeft"){ Figure.setDeg((Figure.deg() - step + 360) % 360); e.preventDefault(); }
+  if(e.key === "Home"){ Figure.setDeg(0); e.preventDefault(); }
+});
+
+$("#spinBtn").addEventListener("click", e => {
+  Figure.spin = !Figure.spin;
+  e.currentTarget.setAttribute("aria-pressed", String(Figure.spin));
+});
+$("#flipBtn").addEventListener("click", e => {
+  const on = !stage.classList.contains("mirrored");
+  stage.classList.toggle("mirrored", on);
+  e.currentTarget.setAttribute("aria-pressed", String(on));
+  $("#mirrorBadge").hidden = !on;
+});
+$("#frontBtn").addEventListener("click", () => Figure.setDeg(0));
+$("#tuneBtn").addEventListener("click", e => {
+  const on = !$("#tunePanel").classList.contains("on");
+  $("#tunePanel").classList.toggle("on", on);
+  e.currentTarget.setAttribute("aria-pressed", String(on));
+  Figure.resize(stage);
+});
+
+const TUNE = [
+  { k:"faceZoom", label:"Face size",     min:0.75, max:1.6,  step:0.01, fmt:v => "×" + (+v).toFixed(2) },
+  { k:"faceY",    label:"Face position", min:-0.16, max:0.16, step:0.005, fmt:v => (v > 0 ? "+" : "") + Math.round(v*100) + "%" },
+  { k:"heightCm", label:"Height",        min:140, max:205,  step:1,    fmt:v => v + " cm" }
+];
+function scanTuneHTML(){
+  if(!Figure.hasScan()) return "";
+  const on = State.profile.useScan !== false;
+  const photo = State.profile.scanPhotoSkin !== false;
+  return `<div class="field"><span class="flabel">Body</span><div class="chips">
+      <button class="chip" data-tsrc="scan" aria-pressed="${on}">Your scan</button>
+      <button class="chip" data-tsrc="mannequin" aria-pressed="${!on}">Mannequin</button></div></div>
+    <div class="field"><span class="flabel">Scan surface</span><div class="chips">
+      <button class="chip" data-tskin="photo" aria-pressed="${photo}">Photographs</button>
+      <button class="chip" data-tskin="plain" aria-pressed="${!photo}">Plain</button></div></div>`;
+}
+function renderTune(){
+  const host = $("#tuneControls");
+  host.innerHTML = TUNE.map(f => `
+    <div class="field"><span class="flabel">${f.label}</span>
+      <div class="scaleRow"><input type="range" data-tk="${f.k}" min="${f.min}" max="${f.max}" step="${f.step}" value="${State.profile[f.k]}">
+      <span class="val mono" data-tv="${f.k}">${f.fmt(State.profile[f.k])}</span></div></div>`).join("")
+    + scanTuneHTML();
+  host.querySelectorAll("[data-tk]").forEach(r => r.addEventListener("input", () => {
+    const f = TUNE.find(x => x.k === r.dataset.tk);
+    State.profile[f.k] = +r.value;
+    host.querySelector(`[data-tv="${f.k}"]`).textContent = f.fmt(+r.value);
+    syncOther("b", f.k, r.value); queueBody();
+  }));
+  host.querySelectorAll("[data-tsrc]").forEach(b => b.onclick = () => {
+    State.profile.useScan = b.dataset.tsrc === "scan";
+    persistProfile(); Figure.rebuildBody(); Figure.rebuildWear();
+    renderTune(); renderScanCard(); updateCounts();
+  });
+  host.querySelectorAll("[data-tskin]").forEach(b => b.onclick = () => {
+    State.profile.scanPhotoSkin = b.dataset.tskin === "photo";
+    persistProfile(); Figure.rebuildBody(); renderTune();
+  });
+}
+function updateStageNote(){
+  const n = Object.keys(State.profile.selfies || {}).length;
+  const el = $("#stageNote");
+  const scanned = Figure.hasScan() && State.profile.useScan !== false;
+  if(!scanned && n === 0){
+    el.hidden = false;
+    el.innerHTML = 'This is a mannequin, not you yet. <button class="btn sm" style="margin-top:6px" data-go="selfie">Scan your body</button>';
+    el.querySelector("[data-go]").onclick = () => go("selfie");
+  } else if(!scanned){
+    el.hidden = false;
+    el.innerHTML = 'Your face, a mannequin’s body. <button class="btn sm" style="margin-top:6px" data-go="selfie">Scan your body</button>';
+    el.querySelector("[data-go]").onclick = () => go("selfie");
+  } else if(!wornIds().length){
+    el.hidden = false;
+    el.innerHTML = 'Drag to turn. Pinch or scroll to move closer.';
+  } else { el.hidden = true; }
+}
+function updateCounts(){
+  const n = Object.keys(State.profile.selfies || {}).length;
+  const set = (k, v) => $$(`[data-count="${k}"]`).forEach(e => e.textContent = v);
+  set("angles", n + "/4");
+  set("items", String(State.items.length));
+  set("worn", String(wornIds().length));
+  updateStageNote();
+}
+
+/* ------------------------- 6. THE OCCASION ENGINE ------------------------ */
+const CONDITIONS = [{ id:"rain", label:"Rain" }, { id:"wind", label:"Wind" }, { id:"sun", label:"Strong sun" }];
+const TIMES = [{ id:"day", label:"Daytime" }, { id:"evening", label:"Evening" }];
+
+function desiredWarmth(t){
+  if(t >= 27) return 1; if(t >= 21) return 2; if(t >= 15) return 3; if(t >= 8) return 4; return 5;
+}
+function scoreItem(it, occ, b){
+  let s = 6 - 2.3 * Math.abs((it.formality || 3) - occ.target);
+  if(occ.prefer.includes(it.sub)) s += 3.2;
+  if(occ.avoid.includes(it.sub)) s -= 7;
+  if(occ.banColours && occ.banColours.includes(it.colourName)) s -= 9;
+  if(occ.preferColours && occ.preferColours.includes(it.colourName)) s += 1.6;
+  if(["top","bottom","dress","outerwear"].includes(it.cat)){
+    const dw = desiredWarmth(b.tempC);
+    s -= 1.15 * Math.abs((it.warmth || 2) - dw) * (it.cat === "outerwear" ? 1.25 : 1);
+  }
+  const info = subtypeInfo(it.cat, it.sub);
+  const fab = (it.fabric || "").toLowerCase();
+  if(b.cond.includes("rain")){
+    if(info.rain) s += 2.2;
+    if(fab.includes("suede") || fab.includes("silk")) s -= 2.4;
+  }
+  if(b.cond.includes("wind") && it.cat === "outerwear") s += 0.7;
+  if(b.cond.includes("sun") && it.cat === "headwear" && info.brim) s += 2.6;
+  if(b.time === "evening" && (it.formality || 3) >= 4) s += 0.7;
+  if(b.time === "evening" && it.sub === "Sunglasses") s -= 3;
+  const since = it.lastWorn ? (Date.now() - it.lastWorn) / DAY : 999;
+  if(since < 3) s -= 1.9; else if(since > 21) s += 0.7;
+  return s;
+}
+function harmony(a, b){
+  if(!a || !b) return 0;
+  const aN = NEUTRALS.has(a.colourName), bN = NEUTRALS.has(b.colourName);
+  if(aN && bN) return 1.0;
+  if(aN || bN) return 1.4;
+  const A = hexToHsl(a.colour), B = hexToHsl(b.colour);
+  let d = Math.abs(A[0] - B[0]); if(d > 180) d = 360 - d;
+  if(d < 26) return 0.9;
+  if(d > 142) return 0.3;
+  return -1.3;
+}
+function ranked(cat, occ, b){
+  return State.items.filter(i => i.cat === cat)
+    .map(it => ({ it, s: scoreItem(it, occ, b) }))
+    .sort((x, y) => y.s - x.s);
+}
+function recommend(){
+  const b = State.brief;
+  const occ = OCCASIONS.find(o => o.id === b.occasion) || OCCASIONS[2];
+  const tops = ranked("top", occ, b), bottoms = ranked("bottom", occ, b),
+        dresses = ranked("dress", occ, b), shoes = ranked("shoes", occ, b),
+        outers = ranked("outerwear", occ, b), accs = ranked("accessory", occ, b),
+        hats = ranked("headwear", occ, b), bags = ranked("bag", occ, b);
+  const bases = [];
+  for(const t of tops.slice(0,6))
+    for(const bt of bottoms.slice(0,6))
+      bases.push({ top:t, bottom:bt, s: t.s + bt.s + harmony(t.it, bt.it) });
+  for(const d of dresses.slice(0,4)) bases.push({ dress:d, s: d.s*2 + 1.1 });
+  if(!bases.length) return { occ, looks:[], missing:true };
+
+  const cands = [];
+  for(const base of bases){
+    const anchor = (base.dress || base.top).it;
+    if(shoes.length){
+      for(const sh of shoes.slice(0,4))
+        cands.push(Object.assign({}, base, { shoes:sh, s: base.s + sh.s + harmony(sh.it, anchor)*0.6 }));
+    } else cands.push(Object.assign({}, base, { s: base.s - 1 }));
+  }
+  cands.sort((x,y) => y.s - x.s);
+
+  const dw = desiredWarmth(b.tempC);
+  const wantOuter = !occ.noJacket && (dw >= 3 || occ.wantsJacket || b.cond.includes("rain") || b.cond.includes("wind"));
+  const chosen = [];
+  for(const c of cands){
+    const ids = [c.top && c.top.it.id, c.bottom && c.bottom.it.id, c.dress && c.dress.it.id, c.shoes && c.shoes.it.id].filter(Boolean);
+    if(chosen.some(p => p.ids.filter(x => ids.includes(x)).length >= 2)) continue;
+    c.ids = ids;
+    if(wantOuter && outers.length && outers[0].s > -3){
+      const pick = outers.find(o => !chosen.some(p => p.outer && p.outer.it.id === o.it.id)) || outers[0];
+      if(pick.s > -3){ c.outer = pick; c.ids.push(pick.it.id); }
+    }
+    const wantAcc = occ.target >= 3.5 ? 2 : 1;
+    c.accs = accs.filter(a => a.s > 1.6).slice(0, wantAcc);
+    if(b.cond.includes("sun") || dw >= 4){
+      const hat = hats.find(h => h.s > 1.4);
+      if(hat) c.hat = hat;
+    }
+    const bag = bags.find(g => g.s > 1.8);
+    if(bag && occ.target >= 3) c.bag = bag;
+    chosen.push(c);
+    if(chosen.length === 3) break;
+  }
+  return { occ, looks: chosen.map(c => decorate(c, occ, b)), missing:false };
+}
+function decorate(c, occ, b){
+  const pieces = [];
+  const push = (role, e) => { if(e) pieces.push({ role, it:e.it, s:e.s }); };
+  push("Dress", c.dress); push("Top", c.top); push("Bottom", c.bottom);
+  push("Outer", c.outer); push("Shoes", c.shoes); push("Hat", c.hat); push("Bag", c.bag);
+  (c.accs || []).forEach(a => push("Accessory", a));
+  const core = pieces.filter(p => ["Dress","Top","Bottom","Outer","Shoes"].includes(p.role));
+  const f = core.reduce((n,p) => n + (p.it.formality || 3), 0) / Math.max(core.length,1);
+  const reasons = [];
+  const dw = desiredWarmth(b.tempC);
+
+  reasons.push({ t:"Formality", s:`Averages ${f.toFixed(1)} out of 5. ${occ.label} sits around ${occ.target}.` });
+  const hits = pieces.filter(p => occ.prefer.includes(p.it.sub)).map(p => p.it.name);
+  if(hits.length) reasons.push({ t:"Fit", s:`${hits.slice(0,2).join(" and ")} ${hits.length > 1 ? "are" : "is"} squarely what this asks for.` });
+  const warm = c.outer ? c.outer.it : null;
+  reasons.push({ t:"Weather", s: warm
+    ? `${b.tempC} °C, so the ${warm.name} goes over the top.`
+    : (dw <= 2 ? `${b.tempC} °C — nothing heavier than it needs.` : `${b.tempC} °C, and nothing you own layers over this well.`) });
+  const two = core.filter(p => p.role !== "Shoes").slice(0,2);
+  if(two.length === 2){
+    const h = harmony(two[0].it, two[1].it);
+    const same = two[0].it.colourName === two[1].it.colourName;
+    reasons.push({ t:"Colour", s: same
+      ? `${two[0].it.colourName} on ${two[0].it.colourName} — tonal, so let the shoes carry the contrast.`
+      : h >= 1.0 ? `${two[0].it.colourName} with ${two[1].it.colourName} — neither is trying to win.`
+      : h > 0 ? `${two[0].it.colourName} against ${two[1].it.colourName} reads as a deliberate pairing.`
+      : `${two[0].it.colourName} and ${two[1].it.colourName} fight a little. Swap one if it bothers you.`,
+      warn: h < 0 });
+  }
+  if(occ.banColours){
+    const slip = pieces.find(p => occ.banColours.includes(p.it.colourName));
+    reasons.push(slip
+      ? { t:"Rule", s:`The ${slip.it.name} is ${slip.it.colourName}. ${occ.banReason} Swap it if you can.`, warn:true }
+      : { t:"Rule", s:`Nothing ${occ.banColours[0]} in it. ${occ.banReason}` });
+  }
+  if(b.cond.includes("rain")){
+    const dry = pieces.find(p => subtypeInfo(p.it.cat, p.it.sub).rain);
+    reasons.push({ t:"Rain", s: dry ? `The ${dry.it.name} handles the wet.` : `Nothing here is properly waterproof. Take an umbrella.`, warn: !dry });
+  }
+  const rested = pieces.filter(p => !p.it.lastWorn || (Date.now() - p.it.lastWorn) > 21*DAY);
+  if(rested.length >= 2) reasons.push({ t:"Rotation", s:`${rested.length} of these have been sitting unworn.` });
+  const weak = pieces.find(p => p.s < -2);
+  if(weak) reasons.push({ t:"Caution", s:`The ${weak.it.name} is the weak link — it's the only ${CAT_BY_ID[weak.it.cat].one.toLowerCase()} you have that fits.`, warn:true });
+  /* the same divisor for every look, so the meter agrees with the ranking */
+  const fit = clamp(Math.round(48 + (c.s / 3) * 5.4), 10, 97);
+  return { pieces, reasons, fit, formality:f, ids:c.ids || [] };
+}
+
+function renderOccasionForm(){
+  $("#occChips").innerHTML = OCCASIONS.map(o =>
+    `<button class="chip" data-occ="${o.id}" aria-pressed="${State.brief.occasion === o.id}">${esc(o.label)}</button>`).join("");
+  $("#occChips").querySelectorAll("[data-occ]").forEach(b => b.onclick = () => {
+    State.brief.occasion = b.dataset.occ; renderOccasionForm(); renderLooks();
+  });
+  $("#condChips").innerHTML = CONDITIONS.map(c =>
+    `<button class="chip" data-cond="${c.id}" aria-pressed="${State.brief.cond.includes(c.id)}">${esc(c.label)}</button>`).join("");
+  $("#condChips").querySelectorAll("[data-cond]").forEach(b => b.onclick = () => {
+    const id = b.dataset.cond;
+    State.brief.cond = State.brief.cond.includes(id) ? State.brief.cond.filter(x => x !== id) : State.brief.cond.concat(id);
+    renderOccasionForm(); renderLooks();
+  });
+  $("#timeChips").innerHTML = TIMES.map(t =>
+    `<button class="chip" data-time="${t.id}" aria-pressed="${State.brief.time === t.id}">${esc(t.label)}</button>`).join("");
+  $("#timeChips").querySelectorAll("[data-time]").forEach(b => b.onclick = () => {
+    State.brief.time = b.dataset.time; renderOccasionForm(); renderLooks();
+  });
+  $("#tempRange").value = State.brief.tempC;
+  $("#tempVal").textContent = State.brief.tempC + " °C";
+}
+$("#tempRange").addEventListener("input", e => {
+  State.brief.tempC = +e.target.value;
+  $("#tempVal").textContent = e.target.value + " °C";
+});
+$("#tempRange").addEventListener("change", renderLooks);
+$("#recBtn").addEventListener("click", renderLooks);
+
+const ORDINAL = ["First choice","Second choice","Third choice"];
+async function renderLooks(){
+  const host = $("#looks");
+  const out = recommend();
+  State.looks = out.looks;
+  if(out.missing || !out.looks.length){
+    host.innerHTML = `<div class="empty"><h3>Not enough to work with</h3>
+      <p style="margin:0">Add at least one top and one bottom, or a dress, and the picker has something to rank.</p></div>`;
+    return;
+  }
+  host.innerHTML = out.looks.map((L, i) => `
+    <article class="look">
+      <div class="lookhead">
+        <div><div class="rank mono">${ORDINAL[i].toUpperCase()}</div>
+        <h3>${esc(L.pieces.map(p => p.it.name).slice(0,2).join(" + "))}</h3></div>
+        <div style="text-align:right">
+          <div class="lookfit">${L.fit}% match</div>
+          <div class="meter" style="margin-top:4px"><i style="width:${L.fit}%"></i></div>
+        </div>
+      </div>
+      <div class="lookpieces">
+        ${L.pieces.map(p => `<div class="piece">
+          <div class="sw"><img data-src="${esc(p.it.photo||"")}" alt=""></div>
+          <div class="role">${esc(p.role)}</div>
+          <div class="nm">${esc(p.it.name)}</div></div>`).join("")}
+      </div>
+      <div class="why"><ul>${L.reasons.map(r =>
+        `<li><span class="mk${r.warn ? " warn" : ""}">${esc(r.t.toUpperCase())}</span><span>${esc(r.s)}</span></li>`).join("")}</ul></div>
+      <div class="lookacts">
+        <button class="btn pri sm" data-try="${i}">Try it in the mirror</button>
+        <button class="btn sm" data-wore="${i}">Mark as worn today</button>
+      </div>
+    </article>`).join("");
+  host.querySelectorAll("[data-try]").forEach(b => b.onclick = () => {
+    const L = State.looks[+b.dataset.try];
+    State.outfit = { accessory: [] };
+    for(const p of L.pieces){
+      const slot = slotOf(p.it);
+      if(slot === "accessory") State.outfit.accessory.push(p.it.id);
+      else State.outfit[slot] = p.it.id;
+    }
+    renderWearing(); renderWardrobe(); Figure.rebuildWear(); go("mirror");
+  });
+  host.querySelectorAll("[data-wore]").forEach(b => b.onclick = async () => {
+    const L = State.looks[+b.dataset.wore];
+    for(const p of L.pieces){
+      const it = itemById(p.it.id); if(!it) continue;
+      it.timesWorn = (it.timesWorn || 0) + 1; it.lastWorn = Date.now();
+      if(!it.sample) await Store.saveItem(it);
+    }
+    toast("Logged. These drop down the list for a couple of weeks.");
+    renderLooks(); renderWardrobe();
+  });
+  for(const img of host.querySelectorAll("img[data-src]")){
+    const u = await Store.imageURL(img.dataset.src); if(u) img.src = u;
+  }
+}
+
+/* -------------------------------- export --------------------------------- */
+(async () => {
+  if(!(window.claude && window.claude.use)) return;
+  let dl = null;
+  try{ dl = await window.claude.use("downloads"); }catch(e){}
+  if(!dl) return;
+  const btn = $("#exportBtn");
+  btn.hidden = false;
+  btn.onclick = async () => {
+    const rows = State.items.map(i => ({
+      name:i.name, category:i.cat, type:i.sub, colour:i.colourName, hex:i.colour,
+      fabric:i.fabric, formality:i.formality, warmth:i.warmth, timesWorn:i.timesWorn || 0,
+      lastWorn: i.lastWorn ? new Date(i.lastWorn).toISOString().slice(0,10) : null, notes:i.notes
+    }));
+    try{
+      await dl.save({ filename:"wardrobe-inventory.json",
+        data: JSON.stringify({ exported:new Date().toISOString(), count:rows.length, items:rows }, null, 2) });
+    }catch(e){ toast("Export was declined."); }
+  };
+})();
+
+/* --------------------------------- boot ---------------------------------- */
+function setStorageChip(){
+  const map = {
+    pending: ["", "Opening wardrobe…"],
+    cloud:   ["on", "Saved to this artifact"],
+    local:   ["local", "Saved on this device"],
+    none:    ["local", "Storage blocked"]
+  };
+  const [cls, txt] = map[Store.mode] || map.pending;
+  for(const id of ["storechip","storechip2"]){
+    const chip = $("#" + id); if(!chip) continue;
+    chip.querySelector(".dot").className = "dot " + cls;
+  }
+  $("#storetext").textContent = txt;
+  $("#storetext2").textContent = txt;
+}
+
+function firstOutfitFromSamples(){
+  const pick = n => (State.items.find(i => i.name === n) || {}).id;
+  return { top: pick("White oxford shirt"), bottom: pick("Charcoal wool trousers"),
+           outerwear: pick("Navy blazer"), shoes: pick("Black derby shoes"),
+           accessory: [pick("Burgundy silk tie")].filter(Boolean) };
+}
+
+(function boot(){
+  State.items = buildSamples();
+  State.usingSamples = true;
+  State.outfit = firstOutfitFromSamples();
+  renderFilters(); renderOccasionForm(); renderBodyControls(); renderTune();
+  renderAngles(); renderScanCard(); renderSampleNotice(); renderWardrobe(); renderWearing(); renderLooks();
+  paintRuler(0);
+  go("mirror");
+  setStorageChip();
+
+  Store.init().then(async () => {
+    setStorageChip();
+    try{
+      const p = await Store.getProfile();
+      if(p) State.profile = Object.assign({}, DEFAULT_PROFILE, p, { selfies: p.selfies || {} });
+      const items = await Store.allItems();
+      if(items && items.length){
+        State.items = items;
+        State.usingSamples = false;
+        State.outfit = {};
+      }
+    }catch(e){}
+    renderBodyControls(); renderTune(); renderAngles(); renderScanCard();
+    renderSampleNotice(); renderWardrobe(); renderWearing(); renderLooks();
+    Figure.rebuildBody(); Figure.rebuildWear();
+    updateCounts();
+    restoreScan();
+  });
+
+  if(window.claude && window.claude.use){
+    window.claude.use("sample").then(async s => {
+      if(!s) return;
+      try{ const lim = await s.limits(); if(lim && lim.images) sampleCap = s; }catch(e){}
+    }).catch(() => {});
+  }
+})();
+</script>
